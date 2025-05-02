@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import {
-  getSurveyResponses,
-  clearSurveyResponses,
+  getAllSurveyResponses,
+  clearAllSurveyData,
 } from '@/lib/localStorage';
 import { SurveyResponse } from '@/types/survey';
 import { Button } from "@/components/ui/button";
@@ -11,13 +12,13 @@ const AdminPage = () => {
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
 
   useEffect(() => {
-    const storedResponses = getSurveyResponses();
+    const storedResponses = getAllSurveyResponses();
     setResponses(storedResponses);
   }, []);
 
   const handleClearResponses = () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer toutes les réponses du sondage ? Cette action est irréversible.")) {
-      clearSurveyResponses();
+      clearAllSurveyData();
       setResponses([]);
       alert("Toutes les réponses du sondage ont été supprimées.");
     }
