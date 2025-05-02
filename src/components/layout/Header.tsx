@@ -35,7 +35,7 @@ const Header: FC<HeaderProps> = ({ isAdmin = false }) => {
                   isAdmin ? 'text-survey-primary font-medium' : 'text-gray-600 dark:text-gray-300'
                 }`}
               >
-                Admin
+                Administration
               </Link>
             </li>
           </ul>

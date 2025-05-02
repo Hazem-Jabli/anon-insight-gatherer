@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -152,11 +153,11 @@ const Index = () => {
         ) : (
           <>
             <div className="max-w-3xl mx-auto mb-6">
-              <div className="flex justify-center items-start relative mb-4">
-                <div className="absolute left-0 top-1">
+              <div className="flex flex-col items-center mb-4">
+                <div className="absolute top-4 right-4 md:right-8">
                   <ThemeToggle />
                 </div>
-                <div className="text-center">
+                <div className="text-center mt-4">
                   <h1 className="text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
                     Sondage Anonyme sur le Crédit d'Investissement
                   </h1>
@@ -166,7 +167,7 @@ const Index = () => {
                 </div>
               </div>
               
-              <Alert className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+              <Alert className="mb-8 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
                 <AlertTitle className="text-blue-800 dark:text-blue-300 font-medium">Avis de confidentialité</AlertTitle>
                 <AlertDescription className="text-blue-700 dark:text-blue-400">
                   Ce sondage est complètement anonyme. Aucune information personnelle identifiable n'est collectée.
@@ -195,6 +196,7 @@ const Index = () => {
                     type="button" 
                     variant="outline"
                     onClick={handleResetForm}
+                    size="sm"
                     className="flex items-center gap-2"
                   >
                     <RotateCcw className="h-4 w-4" />
@@ -204,7 +206,7 @@ const Index = () => {
                   <Button 
                     type="submit" 
                     size="lg"
-                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-8"
+                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-10"
                   >
                     <Send className="h-4 w-4" />
                     Soumettre le sondage

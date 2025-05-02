@@ -54,6 +54,8 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                   <SelectItem value="all-genders">Tous les genres</SelectItem>
                   <SelectItem value="male">Homme</SelectItem>
                   <SelectItem value="female">Femme</SelectItem>
+                  <SelectItem value="non-binary">Non-binaire</SelectItem>
+                  <SelectItem value="prefer-not-to-say">Préfère ne pas dire</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -132,21 +134,20 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         </div>
         
         {/* Boutons de gestion - En bas */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-6">
           <Button 
             variant="outline"
             onClick={onResetFilters}
-            className="w-full"
+            className="mr-2"
           >
             Réinitialiser les filtres
           </Button>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-wrap gap-2 mt-4">
             <Button
               variant="outline"
               onClick={() => onExportData('json')}
               disabled={responseCount === 0}
-              className="w-full"
             >
               Exporter JSON
             </Button>
@@ -155,20 +156,19 @@ const FilterControls: React.FC<FilterControlsProps> = ({
               variant="outline"
               onClick={() => onExportData('csv')}
               disabled={responseCount === 0}
-              className="w-full"
             >
               Exporter CSV
             </Button>
+            
+            <Button
+              variant="destructive"
+              onClick={onResetData}
+              disabled={responseCount === 0}
+              className="ml-auto"
+            >
+              Effacer toutes les données
+            </Button>
           </div>
-          
-          <Button
-            variant="destructive"
-            onClick={onResetData}
-            disabled={responseCount === 0}
-            className="w-full md:col-span-2"
-          >
-            Effacer toutes les données
-          </Button>
         </div>
       </CardContent>
     </Card>

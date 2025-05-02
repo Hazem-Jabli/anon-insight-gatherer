@@ -77,13 +77,13 @@ const OpinionsSection: React.FC<OpinionsSectionProps> = ({
       </CardHeader>
       <CardContent className="space-y-8">
         {/* Tolérance au risque */}
-        <div className="space-y-3">
+        <div className="space-y-3 mb-10">
           <Label htmlFor="risk-tolerance" className="block text-sm font-medium mb-2">
             Comment décririez-vous votre tolérance au risque pour les investissements ?
           </Label>
           <RadioGroup 
             id="risk-tolerance"
-            value={surveyData.opinions.riskTolerance}
+            value={surveyData.opinions.riskTolerance || ""}
             onValueChange={(value) => updateSurveyData('opinions.riskTolerance', value)}
             className="flex flex-col space-y-3"
           >
@@ -111,7 +111,7 @@ const OpinionsSection: React.FC<OpinionsSectionProps> = ({
         </div>
         
         {/* Avantages perçus */}
-        <div className="space-y-3">
+        <div className="space-y-3 mb-10">
           <Label className="block text-sm font-medium mb-2">
             Quels sont selon vous les principaux avantages du crédit d'investissement ? (Sélectionnez tous ceux qui s'appliquent)
           </Label>
@@ -137,7 +137,7 @@ const OpinionsSection: React.FC<OpinionsSectionProps> = ({
         </div>
         
         {/* Risques perçus */}
-        <div className="space-y-3">
+        <div className="space-y-3 mb-10">
           <Label className="block text-sm font-medium mb-2">
             Quels sont selon vous les principaux risques du crédit d'investissement ? (Sélectionnez tous ceux qui s'appliquent)
           </Label>
