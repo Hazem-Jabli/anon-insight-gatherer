@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Radio, RadioGroup } from '@/components/ui/radio-group';
+import { RadioGroup } from '@/components/ui/radio-group';
+import { Radio } from '@/components/ui/radio';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
