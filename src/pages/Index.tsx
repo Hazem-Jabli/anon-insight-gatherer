@@ -7,6 +7,7 @@ import Footer from '@/components/layout/Footer';
 import DemographicsSection from '@/components/survey/DemographicsSection';
 import KnowledgeSection from '@/components/survey/KnowledgeSection';
 import OpinionsSection from '@/components/survey/OpinionsSection';
+import ThemeToggle from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -17,7 +18,6 @@ import {
   getSurveyInProgress, 
   saveSurveyInProgress 
 } from '@/lib/localStorage';
-import { set } from 'date-fns';
 
 const Index = () => {
   // Initialize survey data state
@@ -101,7 +101,7 @@ const Index = () => {
     // Update UI
     setSubmitted(true);
     
-    toast.success("Survey submitted successfully! Thank you for your participation.");
+    toast.success("Sondage soumis avec succès! Merci pour votre participation.");
     
     console.log("Survey submitted:", completeResponse);
   };
@@ -114,45 +114,61 @@ const Index = () => {
     });
     setSubmitted(false);
   };
+  
+  // Reset the form
+  const handleResetForm = () => {
+    if (window.confirm("Êtes-vous sûr de vouloir réinitialiser le formulaire ? Toutes les données saisies seront perdues.")) {
+      setSurveyData({
+        ...emptySurveyResponse,
+        id: uuidv4()
+      });
+      toast.info("Formulaire réinitialisé");
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header />
       
       <main className="flex-grow container mx-auto p-4 sm:p-6">
         {submitted ? (
           <Card className="max-w-2xl mx-auto mt-8">
             <CardHeader>
-              <CardTitle>Thank You for Your Participation!</CardTitle>
+              <CardTitle>Merci pour votre participation!</CardTitle>
               <CardDescription>
-                Your response has been recorded anonymously.
+                Votre réponse a été enregistrée de manière anonyme.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <p>
-                Your feedback will help us understand perspectives on investment credit
-                without collecting any personally identifiable information.
+                Vos commentaires nous aideront à comprendre les perspectives sur le crédit d'investissement
+                sans collecter aucune information personnelle identifiable.
               </p>
               <Button onClick={handleStartNewSurvey}>
-                Start Another Survey
+                Commencer un autre sondage
               </Button>
             </CardContent>
           </Card>
         ) : (
           <>
             <div className="max-w-3xl mx-auto mb-6">
-              <h1 className="text-3xl font-bold text-center text-survey-dark mb-2">
-                Anonymous Investment Credit Survey
-              </h1>
-              <p className="text-center text-gray-600 mb-6">
-                Help us understand perspectives on investment credit without sharing any personal information
-              </p>
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
+                    Sondage Anonyme sur le Crédit d'Investissement
+                  </h1>
+                  <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+                    Aidez-nous à comprendre les perspectives sur le crédit d'investissement sans partager d'informations personnelles
+                  </p>
+                </div>
+                <ThemeToggle className="flex-none" />
+              </div>
               
               <Alert className="mb-6">
-                <AlertTitle>Privacy Notice</AlertTitle>
+                <AlertTitle>Avis de confidentialité</AlertTitle>
                 <AlertDescription>
-                  This survey is completely anonymous. No personal identifying information is collected.
-                  Your responses are stored only on your device and can be cleared at any time.
+                  Ce sondage est complètement anonyme. Aucune information personnelle identifiable n'est collectée.
+                  Vos réponses sont stockées uniquement sur votre appareil et peuvent être effacées à tout moment.
                 </AlertDescription>
               </Alert>
               
@@ -172,13 +188,21 @@ const Index = () => {
                   updateSurveyData={updateSurveyData} 
                 />
                 
-                <div className="mt-6 flex justify-center">
+                <div className="mt-8 flex justify-center space-x-4">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={handleResetForm}
+                  >
+                    Réinitialiser le formulaire
+                  </Button>
+                  
                   <Button 
                     type="submit" 
                     size="lg"
                     className="bg-survey-primary hover:bg-survey-highlight text-white"
                   >
-                    Submit Survey
+                    Soumettre le sondage
                   </Button>
                 </div>
               </form>

@@ -12,16 +12,16 @@ interface KnowledgeSectionProps {
   updateSurveyData: (field: string, value: any) => void;
 }
 
-// Array of investment types
+// Liste des types d'investissement
 const investmentTypes = [
-  { id: 'stocks', label: 'Stocks' },
-  { id: 'bonds', label: 'Bonds' },
-  { id: 'mutual-funds', label: 'Mutual Funds' },
-  { id: 'etfs', label: 'ETFs' },
-  { id: 'real-estate', label: 'Real Estate' },
-  { id: 'crypto', label: 'Cryptocurrencies' },
-  { id: 'retirement', label: 'Retirement Accounts' },
-  { id: 'commodities', label: 'Commodities' },
+  { id: 'stocks', label: 'Actions' },
+  { id: 'bonds', label: 'Obligations' },
+  { id: 'mutual-funds', label: 'Fonds communs' },
+  { id: 'etfs', label: 'FNB' },
+  { id: 'real-estate', label: 'Immobilier' },
+  { id: 'crypto', label: 'Cryptomonnaies' },
+  { id: 'retirement', label: 'Comptes de retraite' },
+  { id: 'commodities', label: 'Matières premières' },
 ];
 
 const KnowledgeSection: React.FC<KnowledgeSectionProps> = ({ 
@@ -53,36 +53,36 @@ const KnowledgeSection: React.FC<KnowledgeSectionProps> = ({
     <Card className="mb-6">
       <CardHeader>
         <CardTitle className="text-xl font-semibold text-survey-dark">
-          Investment Knowledge & Experience
+          Connaissances et Expérience en Investissement
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Self-Rated Knowledge */}
-        <div>
+      <CardContent className="space-y-8">
+        {/* Connaissance auto-évaluée */}
+        <div className="space-y-3">
           <Label htmlFor="knowledge-level" className="block text-sm font-medium mb-2">
-            How would you rate your knowledge of investment credit?
+            Comment évalueriez-vous votre connaissance du crédit d'investissement ?
           </Label>
           <RadioGroup 
             id="knowledge-level"
             value={surveyData.investmentKnowledge.selfRatedKnowledge}
             onValueChange={(value) => updateSurveyData('investmentKnowledge.selfRatedKnowledge', value)}
-            className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:space-x-4"
+            className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
               <Radio value="none" id="knowledge-none" />
-              <Label htmlFor="knowledge-none">None</Label>
+              <Label htmlFor="knowledge-none">Aucune</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="basic" id="knowledge-basic" />
-              <Label htmlFor="knowledge-basic">Basic</Label>
+              <Label htmlFor="knowledge-basic">Basique</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="intermediate" id="knowledge-intermediate" />
-              <Label htmlFor="knowledge-intermediate">Intermediate</Label>
+              <Label htmlFor="knowledge-intermediate">Intermédiaire</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="advanced" id="knowledge-advanced" />
-              <Label htmlFor="knowledge-advanced">Advanced</Label>
+              <Label htmlFor="knowledge-advanced">Avancée</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="expert" id="knowledge-expert" />
@@ -91,68 +91,68 @@ const KnowledgeSection: React.FC<KnowledgeSectionProps> = ({
           </RadioGroup>
         </div>
         
-        {/* Previous Experience */}
-        <div>
+        {/* Expérience précédente */}
+        <div className="space-y-3">
           <Label htmlFor="previous-experience" className="block text-sm font-medium mb-2">
-            Have you previously used investment credit products?
+            Avez-vous déjà utilisé des produits de crédit d'investissement ?
           </Label>
           <RadioGroup 
             id="previous-experience"
             value={surveyData.investmentKnowledge.previousExperience ? "yes" : "no"}
             onValueChange={(value) => updateSurveyData('investmentKnowledge.previousExperience', value === "yes")}
-            className="flex space-x-4"
+            className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
               <Radio value="yes" id="experience-yes" />
-              <Label htmlFor="experience-yes">Yes</Label>
+              <Label htmlFor="experience-yes">Oui</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="no" id="experience-no" />
-              <Label htmlFor="experience-no">No</Label>
+              <Label htmlFor="experience-no">Non</Label>
             </div>
           </RadioGroup>
         </div>
         
-        {/* Investment Frequency */}
-        <div>
+        {/* Fréquence d'investissement */}
+        <div className="space-y-3">
           <Label htmlFor="investment-frequency" className="block text-sm font-medium mb-2">
-            How often do you make investment decisions?
+            À quelle fréquence prenez-vous des décisions d'investissement ?
           </Label>
           <RadioGroup 
             id="investment-frequency"
             value={surveyData.investmentKnowledge.frequencyOfInvestment}
             onValueChange={(value) => updateSurveyData('investmentKnowledge.frequencyOfInvestment', value)}
-            className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:space-x-4"
+            className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
               <Radio value="never" id="frequency-never" />
-              <Label htmlFor="frequency-never">Never</Label>
+              <Label htmlFor="frequency-never">Jamais</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="rarely" id="frequency-rarely" />
-              <Label htmlFor="frequency-rarely">Rarely</Label>
+              <Label htmlFor="frequency-rarely">Rarement</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="occasionally" id="frequency-occasionally" />
-              <Label htmlFor="frequency-occasionally">Occasionally</Label>
+              <Label htmlFor="frequency-occasionally">Occasionnellement</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="frequently" id="frequency-frequently" />
-              <Label htmlFor="frequency-frequently">Frequently</Label>
+              <Label htmlFor="frequency-frequently">Fréquemment</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="regularly" id="frequency-regularly" />
-              <Label htmlFor="frequency-regularly">Regularly</Label>
+              <Label htmlFor="frequency-regularly">Régulièrement</Label>
             </div>
           </RadioGroup>
         </div>
         
-        {/* Preferred Investment Types */}
-        <div>
+        {/* Types d'investissement préférés */}
+        <div className="space-y-3">
           <Label className="block text-sm font-medium mb-2">
-            Which investment types are you most interested in? (Select all that apply)
+            Quels types d'investissement vous intéressent le plus ? (Sélectionnez tous ceux qui s'appliquent)
           </Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
             {investmentTypes.map((type) => (
               <div key={type.id} className="flex items-center space-x-2">
                 <Checkbox

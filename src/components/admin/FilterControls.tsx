@@ -35,114 +35,122 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   return (
     <Card className="mb-6">
       <CardContent className="pt-6">
-        <div className="flex flex-col lg:flex-row gap-4 justify-between">
-          {/* Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Contrôles de Filtres - Colonne Gauche */}
+          <div className="flex flex-col gap-4">
+            <h3 className="font-medium text-base">Filtres</h3>
+            
             <div>
-              <Label htmlFor="filter-gender" className="mb-2 block">Gender</Label>
+              <Label htmlFor="filter-gender" className="mb-2 block">Genre</Label>
               <Select
                 value={filters.gender || 'all-genders'}
                 onValueChange={(value) => onFilterChange('gender', value === 'all-genders' ? null : value)}
               >
-                <SelectTrigger id="filter-gender" className="w-[180px]">
-                  <SelectValue placeholder="All Genders" />
+                <SelectTrigger id="filter-gender" className="w-full">
+                  <SelectValue placeholder="Tous les genres" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-genders">All Genders</SelectItem>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="non-binary">Non-Binary</SelectItem>
-                  <SelectItem value="prefer-not-to-say">Prefer Not To Say</SelectItem>
+                  <SelectItem value="all-genders">Tous les genres</SelectItem>
+                  <SelectItem value="male">Homme</SelectItem>
+                  <SelectItem value="female">Femme</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label htmlFor="filter-age" className="mb-2 block">Age Group</Label>
+              <Label htmlFor="filter-age" className="mb-2 block">Groupe d'âge</Label>
               <Select
                 value={filters.ageGroup || 'all-ages'}
                 onValueChange={(value) => onFilterChange('ageGroup', value === 'all-ages' ? null : value)}
               >
-                <SelectTrigger id="filter-age" className="w-[180px]">
-                  <SelectValue placeholder="All Age Groups" />
+                <SelectTrigger id="filter-age" className="w-full">
+                  <SelectValue placeholder="Tous les âges" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-ages">All Age Groups</SelectItem>
-                  <SelectItem value="18-24">18-24 years</SelectItem>
-                  <SelectItem value="25-34">25-34 years</SelectItem>
-                  <SelectItem value="35-44">35-44 years</SelectItem>
-                  <SelectItem value="45-54">45-54 years</SelectItem>
-                  <SelectItem value="55-64">55-64 years</SelectItem>
-                  <SelectItem value="65+">65+ years</SelectItem>
+                  <SelectItem value="all-ages">Tous les âges</SelectItem>
+                  <SelectItem value="18-24">18-24 ans</SelectItem>
+                  <SelectItem value="25-34">25-34 ans</SelectItem>
+                  <SelectItem value="35-44">35-44 ans</SelectItem>
+                  <SelectItem value="45-54">45-54 ans</SelectItem>
+                  <SelectItem value="55-64">55-64 ans</SelectItem>
+                  <SelectItem value="65+">65+ ans</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label htmlFor="filter-education" className="mb-2 block">Education</Label>
+              <Label htmlFor="filter-education" className="mb-2 block">Éducation</Label>
               <Select
                 value={filters.educationLevel || 'all-education'}
                 onValueChange={(value) => onFilterChange('educationLevel', value === 'all-education' ? null : value)}
               >
-                <SelectTrigger id="filter-education" className="w-[180px]">
-                  <SelectValue placeholder="All Education Levels" />
+                <SelectTrigger id="filter-education" className="w-full">
+                  <SelectValue placeholder="Tous les niveaux d'éducation" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-education">All Education Levels</SelectItem>
-                  <SelectItem value="high-school">High School</SelectItem>
-                  <SelectItem value="some-college">Some College</SelectItem>
-                  <SelectItem value="bachelors">Bachelor's</SelectItem>
-                  <SelectItem value="masters">Master's</SelectItem>
-                  <SelectItem value="doctorate">Doctorate</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="all-education">Tous les niveaux</SelectItem>
+                  <SelectItem value="high-school">Lycée</SelectItem>
+                  <SelectItem value="some-college">Formation supérieure</SelectItem>
+                  <SelectItem value="bachelors">Licence</SelectItem>
+                  <SelectItem value="masters">Master</SelectItem>
+                  <SelectItem value="doctorate">Doctorat</SelectItem>
+                  <SelectItem value="other">Autre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            <div className="self-end">
+            <div>
               <Button 
                 variant="outline"
                 onClick={onResetFilters}
+                className="w-full"
               >
-                Reset Filters
+                Réinitialiser les filtres
               </Button>
             </div>
           </div>
           
-          {/* Data Management Controls */}
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-            <div className="text-sm text-gray-500 hidden md:block">
-              Total Responses: <span className="font-medium">{responseCount}</span>
+          {/* Contrôles de Gestion des Données - Colonne Droite */}
+          <div className="flex flex-col gap-4">
+            <h3 className="font-medium text-base">Gestion des données</h3>
+            
+            <div className="text-sm text-gray-500">
+              Total des réponses: <span className="font-medium">{responseCount}</span>
             </div>
             
-            <div className="flex gap-3">
+            <div>
               <Button
                 variant="outline"
                 onClick={() => onExportData('json')}
                 disabled={responseCount === 0}
+                className="w-full mb-2"
               >
-                Export JSON
+                Exporter en JSON
               </Button>
+            </div>
+            
+            <div>
               <Button
                 variant="outline"
                 onClick={() => onExportData('csv')}
                 disabled={responseCount === 0}
+                className="w-full mb-2"
               >
-                Export CSV
+                Exporter en CSV
               </Button>
+            </div>
+            
+            <div>
               <Button
                 variant="destructive"
                 onClick={onResetData}
                 disabled={responseCount === 0}
+                className="w-full"
               >
-                Reset All Data
+                Effacer toutes les données
               </Button>
             </div>
           </div>
-        </div>
-        
-        <div className="text-sm text-gray-500 mt-4 block md:hidden">
-          Total Responses: <span className="font-medium">{responseCount}</span>
         </div>
       </CardContent>
     </Card>

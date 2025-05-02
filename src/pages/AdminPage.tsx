@@ -14,44 +14,44 @@ import {
 import { SurveyResponse } from '@/types/survey';
 
 const AdminPage = () => {
-  // State for storing survey responses
+  // État pour stocker les réponses au sondage
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
   
-  // State for filters
+  // État pour les filtres
   const [filters, setFilters] = useState({
     gender: null as string | null,
     ageGroup: null as string | null,
     educationLevel: null as string | null
   });
   
-  // Load responses on mount
+  // Charger les réponses au montage
   useEffect(() => {
-    // Skip if running on server
+    // Ignorer si exécuté sur le serveur
     if (typeof window === 'undefined') return;
     
     loadResponses();
   }, []);
   
-  // Load all responses from localStorage
+  // Charger toutes les réponses depuis localStorage
   const loadResponses = () => {
     try {
       const loadedResponses = getAllSurveyResponses();
       setResponses(loadedResponses);
       
       if (loadedResponses.length === 0) {
-        toast("No survey responses found", {
-          description: "Waiting for responses to be submitted"
+        toast("Aucune réponse au sondage trouvée", {
+          description: "En attente de soumission de réponses"
         });
       } else {
-        toast.success(`${loadedResponses.length} survey responses loaded`);
+        toast.success(`${loadedResponses.length} réponses au sondage chargées`);
       }
     } catch (error) {
-      console.error("Error loading survey responses:", error);
-      toast.error("Error loading survey data");
+      console.error("Erreur lors du chargement des réponses au sondage:", error);
+      toast.error("Erreur lors du chargement des données du sondage");
     }
   };
   
-  // Handle filter changes
+  // Gérer les changements de filtre
   const handleFilterChange = (filterName: string, value: string | null) => {
     setFilters(prev => ({
       ...prev,
@@ -59,27 +59,27 @@ const AdminPage = () => {
     }));
   };
   
-  // Reset all filters
+  // Réinitialiser tous les filtres
   const handleResetFilters = () => {
     setFilters({
       gender: null,
       ageGroup: null,
       educationLevel: null
     });
-    toast("Filters reset");
+    toast("Filtres réinitialisés");
   };
   
-  // Reset all data
+  // Réinitialiser toutes les données
   const handleResetData = () => {
-    // Confirm before deleting all data
-    if (window.confirm("Are you sure you want to delete all survey data? This action cannot be undone.")) {
+    // Confirmer avant de supprimer toutes les données
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer toutes les données du sondage ? Cette action ne peut pas être annulée.")) {
       clearAllSurveyData();
       setResponses([]);
-      toast.success("All survey data has been cleared");
+      toast.success("Toutes les données du sondage ont été effacées");
     }
   };
   
-  // Export data
+  // Exporter les données
   const handleExportData = (format: 'json' | 'csv') => {
     try {
       let exportData: string;
@@ -88,15 +88,15 @@ const AdminPage = () => {
       
       if (format === 'json') {
         exportData = exportSurveyDataAsJSON();
-        fileName = `survey-data-${new Date().toISOString().slice(0, 10)}.json`;
+        fileName = `donnees-sondage-${new Date().toISOString().slice(0, 10)}.json`;
         mimeType = 'application/json';
       } else {
         exportData = exportSurveyDataAsCSV();
-        fileName = `survey-data-${new Date().toISOString().slice(0, 10)}.csv`;
+        fileName = `donnees-sondage-${new Date().toISOString().slice(0, 10)}.csv`;
         mimeType = 'text/csv';
       }
       
-      // Create download link
+      // Créer un lien de téléchargement
       const blob = new Blob([exportData], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -105,34 +105,34 @@ const AdminPage = () => {
       document.body.appendChild(a);
       a.click();
       
-      // Clean up
+      // Nettoyage
       setTimeout(() => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }, 0);
       
-      toast.success(`Data exported as ${format.toUpperCase()}`);
+      toast.success(`Données exportées en ${format.toUpperCase()}`);
     } catch (error) {
-      console.error(`Error exporting data as ${format}:`, error);
-      toast.error(`Error exporting data as ${format}`);
+      console.error(`Erreur lors de l'exportation des données au format ${format}:`, error);
+      toast.error(`Erreur lors de l'exportation des données au format ${format}`);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header isAdmin />
       
       <main className="flex-grow container mx-auto p-4 sm:p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-center text-survey-dark mb-2">
-            Survey Admin Dashboard
+          <h1 className="text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
+            Tableau de Bord Administrateur du Sondage
           </h1>
-          <p className="text-center text-gray-600">
-            View and analyze anonymous survey responses
+          <p className="text-center text-gray-600 dark:text-gray-400">
+            Visualiser et analyser les réponses anonymes au sondage
           </p>
         </div>
         
-        {/* Filter and Export Controls */}
+        {/* Contrôles de Filtrage et d'Exportation */}
         <FilterControls 
           onFilterChange={handleFilterChange}
           onResetFilters={handleResetFilters}
@@ -142,11 +142,11 @@ const AdminPage = () => {
           responseCount={responses.length}
         />
         
-        {/* Response Statistics */}
+        {/* Statistiques des Réponses */}
         {responses.length === 0 ? (
-          <div className="bg-white p-6 rounded-md shadow-sm text-center">
-            <p className="text-gray-600 mb-3">No survey responses available.</p>
-            <p className="text-gray-500">Ask participants to complete the survey to see results here.</p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-sm text-center">
+            <p className="text-gray-600 dark:text-gray-400 mb-3">Aucune réponse au sondage disponible.</p>
+            <p className="text-gray-500 dark:text-gray-500">Demandez aux participants de compléter le sondage pour voir les résultats ici.</p>
           </div>
         ) : (
           <ResponseStats 

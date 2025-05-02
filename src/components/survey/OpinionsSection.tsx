@@ -4,7 +4,6 @@ import { RadioGroup } from '@/components/ui/radio-group';
 import { Radio } from '@/components/ui/radio';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SurveyResponse } from '@/types/survey';
 
@@ -13,40 +12,40 @@ interface OpinionsSectionProps {
   updateSurveyData: (field: string, value: any) => void;
 }
 
-// Arrays of options
+// Tableaux d'options
 const advantageOptions = [
-  { id: 'higher-returns', label: 'Potential for higher returns' },
-  { id: 'diversification', label: 'Portfolio diversification' },
-  { id: 'tax-benefits', label: 'Tax benefits' },
-  { id: 'leverage', label: 'Increased purchasing power through leverage' },
-  { id: 'professional-management', label: 'Access to professional management' },
-  { id: 'liquidity', label: 'Improved liquidity' },
+  { id: 'higher-returns', label: 'Potentiel de rendements plus élevés' },
+  { id: 'diversification', label: 'Diversification du portefeuille' },
+  { id: 'tax-benefits', label: 'Avantages fiscaux' },
+  { id: 'leverage', label: 'Pouvoir d\'achat accru grâce à l\'effet de levier' },
+  { id: 'professional-management', label: 'Accès à une gestion professionnelle' },
+  { id: 'liquidity', label: 'Meilleure liquidité' },
 ];
 
 const riskOptions = [
-  { id: 'market-volatility', label: 'Market volatility' },
-  { id: 'interest-rate', label: 'Interest rate risk' },
-  { id: 'leverage-risk', label: 'Risk of excessive leverage' },
-  { id: 'default', label: 'Default risk' },
-  { id: 'illiquidity', label: 'Illiquidity' },
-  { id: 'regulatory', label: 'Regulatory changes' },
+  { id: 'market-volatility', label: 'Volatilité du marché' },
+  { id: 'interest-rate', label: 'Risque de taux d\'intérêt' },
+  { id: 'leverage-risk', label: 'Risque d\'effet de levier excessif' },
+  { id: 'default', label: 'Risque de défaut' },
+  { id: 'illiquidity', label: 'Illiquidité' },
+  { id: 'regulatory', label: 'Changements réglementaires' },
 ];
 
 const barrierOptions = [
-  { id: 'lack-knowledge', label: 'Lack of knowledge/understanding' },
-  { id: 'high-fees', label: 'High fees and costs' },
-  { id: 'min-requirements', label: 'Minimum investment requirements' },
-  { id: 'risk-concerns', label: 'Risk concerns' },
-  { id: 'lack-advice', label: 'Lack of trusted advice' },
-  { id: 'complex-terms', label: 'Complex terms and conditions' },
-  { id: 'past-experience', label: 'Negative past experience' },
+  { id: 'lack-knowledge', label: 'Manque de connaissances/compréhension' },
+  { id: 'high-fees', label: 'Frais et coûts élevés' },
+  { id: 'min-requirements', label: 'Exigences minimales d\'investissement' },
+  { id: 'risk-concerns', label: 'Préoccupations liées au risque' },
+  { id: 'lack-advice', label: 'Manque de conseils fiables' },
+  { id: 'complex-terms', label: 'Conditions générales complexes' },
+  { id: 'past-experience', label: 'Expérience passée négative' },
 ];
 
 const OpinionsSection: React.FC<OpinionsSectionProps> = ({ 
   surveyData, 
   updateSurveyData 
 }) => {
-  // Handle checkbox array changes
+  // Gérer les modifications du tableau de cases à cocher
   const handleCheckboxArrayChange = (
     arrayName: 'perceivedAdvantages' | 'perceivedRisks' | 'barriersToInvestment',
     itemId: string,
@@ -73,50 +72,50 @@ const OpinionsSection: React.FC<OpinionsSectionProps> = ({
     <Card className="mb-6">
       <CardHeader>
         <CardTitle className="text-xl font-semibold text-survey-dark">
-          Opinions & Preferences
+          Opinions et Préférences
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Risk Tolerance */}
-        <div>
+      <CardContent className="space-y-8">
+        {/* Tolérance au risque */}
+        <div className="space-y-3">
           <Label htmlFor="risk-tolerance" className="block text-sm font-medium mb-2">
-            How would you describe your risk tolerance for investments?
+            Comment décririez-vous votre tolérance au risque pour les investissements ?
           </Label>
           <RadioGroup 
             id="risk-tolerance"
             value={surveyData.opinions.riskTolerance}
             onValueChange={(value) => updateSurveyData('opinions.riskTolerance', value)}
-            className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:space-x-4"
+            className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
               <Radio value="very-low" id="risk-very-low" />
-              <Label htmlFor="risk-very-low">Very Low</Label>
+              <Label htmlFor="risk-very-low">Très faible</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="low" id="risk-low" />
-              <Label htmlFor="risk-low">Low</Label>
+              <Label htmlFor="risk-low">Faible</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="moderate" id="risk-moderate" />
-              <Label htmlFor="risk-moderate">Moderate</Label>
+              <Label htmlFor="risk-moderate">Modérée</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="high" id="risk-high" />
-              <Label htmlFor="risk-high">High</Label>
+              <Label htmlFor="risk-high">Élevée</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Radio value="very-high" id="risk-very-high" />
-              <Label htmlFor="risk-very-high">Very High</Label>
+              <Label htmlFor="risk-very-high">Très élevée</Label>
             </div>
           </RadioGroup>
         </div>
         
-        {/* Perceived Advantages */}
-        <div>
+        {/* Avantages perçus */}
+        <div className="space-y-3">
           <Label className="block text-sm font-medium mb-2">
-            What do you perceive as the main advantages of investment credit? (Select all that apply)
+            Quels sont selon vous les principaux avantages du crédit d'investissement ? (Sélectionnez tous ceux qui s'appliquent)
           </Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
             {advantageOptions.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
                 <Checkbox
@@ -137,12 +136,12 @@ const OpinionsSection: React.FC<OpinionsSectionProps> = ({
           </div>
         </div>
         
-        {/* Perceived Risks */}
-        <div>
+        {/* Risques perçus */}
+        <div className="space-y-3">
           <Label className="block text-sm font-medium mb-2">
-            What do you perceive as the main risks of investment credit? (Select all that apply)
+            Quels sont selon vous les principaux risques du crédit d'investissement ? (Sélectionnez tous ceux qui s'appliquent)
           </Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
             {riskOptions.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
                 <Checkbox
@@ -163,12 +162,12 @@ const OpinionsSection: React.FC<OpinionsSectionProps> = ({
           </div>
         </div>
         
-        {/* Barriers to Investment */}
-        <div>
+        {/* Obstacles à l'investissement */}
+        <div className="space-y-3">
           <Label className="block text-sm font-medium mb-2">
-            What barriers prevent you from using investment credit products? (Select all that apply)
+            Quels obstacles vous empêchent d'utiliser des produits de crédit d'investissement ? (Sélectionnez tous ceux qui s'appliquent)
           </Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
             {barrierOptions.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
                 <Checkbox
@@ -187,20 +186,6 @@ const OpinionsSection: React.FC<OpinionsSectionProps> = ({
               </div>
             ))}
           </div>
-        </div>
-        
-        {/* Additional Feedback */}
-        <div>
-          <Label htmlFor="additional-feedback" className="block text-sm font-medium mb-2">
-            Do you have any additional thoughts on investment credit? (Optional)
-          </Label>
-          <Textarea
-            id="additional-feedback"
-            placeholder="Share your thoughts here..."
-            value={surveyData.additionalFeedback || ''}
-            onChange={(e) => updateSurveyData('additionalFeedback', e.target.value)}
-            className="w-full h-32"
-          />
         </div>
       </CardContent>
     </Card>
