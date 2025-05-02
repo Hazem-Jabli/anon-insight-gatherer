@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -13,7 +12,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { emptySurveyResponse, SurveyResponse } from '@/types/survey';
-import { Reset, Send } from 'lucide-react';
+import { RotateCcw, Send } from 'lucide-react';
 import { 
   saveSurveyResponse, 
   getSurveyInProgress, 
@@ -198,7 +197,7 @@ const Index = () => {
                     onClick={handleResetForm}
                     className="flex items-center gap-2"
                   >
-                    <Reset className="h-4 w-4" />
+                    <RotateCcw className="h-4 w-4" />
                     Reset
                   </Button>
                   
