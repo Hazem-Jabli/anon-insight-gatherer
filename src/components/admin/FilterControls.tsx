@@ -41,14 +41,14 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             <div>
               <Label htmlFor="filter-gender" className="mb-2 block">Gender</Label>
               <Select
-                value={filters.gender || ''}
-                onValueChange={(value) => onFilterChange('gender', value === '' ? null : value)}
+                value={filters.gender || 'all-genders'}
+                onValueChange={(value) => onFilterChange('gender', value === 'all-genders' ? null : value)}
               >
                 <SelectTrigger id="filter-gender" className="w-[180px]">
                   <SelectValue placeholder="All Genders" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Genders</SelectItem>
+                  <SelectItem value="all-genders">All Genders</SelectItem>
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
                   <SelectItem value="non-binary">Non-Binary</SelectItem>
@@ -60,14 +60,14 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             <div>
               <Label htmlFor="filter-age" className="mb-2 block">Age Group</Label>
               <Select
-                value={filters.ageGroup || ''}
-                onValueChange={(value) => onFilterChange('ageGroup', value === '' ? null : value)}
+                value={filters.ageGroup || 'all-ages'}
+                onValueChange={(value) => onFilterChange('ageGroup', value === 'all-ages' ? null : value)}
               >
                 <SelectTrigger id="filter-age" className="w-[180px]">
                   <SelectValue placeholder="All Age Groups" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Age Groups</SelectItem>
+                  <SelectItem value="all-ages">All Age Groups</SelectItem>
                   <SelectItem value="18-24">18-24 years</SelectItem>
                   <SelectItem value="25-34">25-34 years</SelectItem>
                   <SelectItem value="35-44">35-44 years</SelectItem>
@@ -81,14 +81,14 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             <div>
               <Label htmlFor="filter-education" className="mb-2 block">Education</Label>
               <Select
-                value={filters.educationLevel || ''}
-                onValueChange={(value) => onFilterChange('educationLevel', value === '' ? null : value)}
+                value={filters.educationLevel || 'all-education'}
+                onValueChange={(value) => onFilterChange('educationLevel', value === 'all-education' ? null : value)}
               >
                 <SelectTrigger id="filter-education" className="w-[180px]">
                   <SelectValue placeholder="All Education Levels" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Education Levels</SelectItem>
+                  <SelectItem value="all-education">All Education Levels</SelectItem>
                   <SelectItem value="high-school">High School</SelectItem>
                   <SelectItem value="some-college">Some College</SelectItem>
                   <SelectItem value="bachelors">Bachelor's</SelectItem>
