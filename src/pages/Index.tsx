@@ -13,6 +13,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { emptySurveyResponse, SurveyResponse } from '@/types/survey';
+import { Reset, Send } from 'lucide-react';
 import { 
   saveSurveyResponse, 
   getSurveyInProgress, 
@@ -152,8 +153,11 @@ const Index = () => {
         ) : (
           <>
             <div className="max-w-3xl mx-auto mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex-1">
+              <div className="flex justify-center items-start relative mb-4">
+                <div className="absolute left-0 top-1">
+                  <ThemeToggle />
+                </div>
+                <div className="text-center">
                   <h1 className="text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
                     Sondage Anonyme sur le Crédit d'Investissement
                   </h1>
@@ -161,12 +165,11 @@ const Index = () => {
                     Aidez-nous à comprendre les perspectives sur le crédit d'investissement sans partager d'informations personnelles
                   </p>
                 </div>
-                <ThemeToggle className="flex-none" />
               </div>
               
-              <Alert className="mb-6">
-                <AlertTitle>Avis de confidentialité</AlertTitle>
-                <AlertDescription>
+              <Alert className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+                <AlertTitle className="text-blue-800 dark:text-blue-300 font-medium">Avis de confidentialité</AlertTitle>
+                <AlertDescription className="text-blue-700 dark:text-blue-400">
                   Ce sondage est complètement anonyme. Aucune information personnelle identifiable n'est collectée.
                   Vos réponses sont stockées uniquement sur votre appareil et peuvent être effacées à tout moment.
                 </AlertDescription>
@@ -193,15 +196,18 @@ const Index = () => {
                     type="button" 
                     variant="outline"
                     onClick={handleResetForm}
+                    className="flex items-center gap-2"
                   >
-                    Réinitialiser le formulaire
+                    <Reset className="h-4 w-4" />
+                    Reset
                   </Button>
                   
                   <Button 
                     type="submit" 
                     size="lg"
-                    className="bg-survey-primary hover:bg-survey-highlight text-white"
+                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-8"
                   >
+                    <Send className="h-4 w-4" />
                     Soumettre le sondage
                   </Button>
                 </div>

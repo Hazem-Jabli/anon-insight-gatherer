@@ -22,11 +22,12 @@ interface ResponseStatsProps {
     ageGroup: string | null;
     educationLevel: string | null;
     gender: string | null;
+    professionalSector?: string | null;
   };
 }
 
 // Chart colors
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
 const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => {
   // Apply filters to responses
@@ -40,6 +41,9 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
     if (filters.gender && response.demographics.gender !== filters.gender) {
       return false;
     }
+    if (filters.professionalSector && response.demographics.professionalSector !== filters.professionalSector) {
+      return false;
+    }
     return true;
   });
 
@@ -47,38 +51,130 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
   const ageGroupData = countByField(filteredResponses, response => response.demographics.ageGroup);
   const educationData = countByField(filteredResponses, response => response.demographics.educationLevel);
   const genderData = countByField(filteredResponses, response => response.demographics.gender);
+  const sectorData = countByField(filteredResponses, response => response.demographics.professionalSector);
   
   // Investment Knowledge Data
   const knowledgeLevelData = countByField(filteredResponses, response => 
     response.investmentKnowledge.selfRatedKnowledge);
   
   const experienceData = [
-    { name: 'Previous Experience', value: filteredResponses.filter(r => 
+    { name: 'Avec Expérience', value: filteredResponses.filter(r => 
       r.investmentKnowledge.previousExperience).length },
-    { name: 'No Experience', value: filteredResponses.filter(r => 
+    { name: 'Sans Expérience', value: filteredResponses.filter(r => 
       !r.investmentKnowledge.previousExperience).length }
   ];
 
   // Risk Tolerance Data
   const riskToleranceData = countByField(filteredResponses, response => 
     response.opinions.riskTolerance);
+    
+  // Investment Goals
+  const investmentGoalsData = countByInvestmentGoals(filteredResponses);
 
   // Helper function to count occurrences by field
   function countByField(data: any[], fieldAccessor: (item: any) => any) {
     const counts: Record<string, number> = {};
     data.forEach(item => {
       const field = fieldAccessor(item);
-      counts[field] = (counts[field] || 0) + 1;
+      if (field) { // Skip null values
+        counts[field] = (counts[field] || 0) + 1;
+      }
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }
+  
+  // Helper function to count investment goals (which is an array)
+  function countByInvestmentGoals(data: SurveyResponse[]) {
+    const counts: Record<string, number> = {};
+    data.forEach(item => {
+      const goals = item.opinions.preferredInvestmentGoals;
+      if (goals && Array.isArray(goals)) {
+        goals.forEach(goal => {
+          counts[goal] = (counts[goal] || 0) + 1;
+        });
+      }
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }
 
   // Format labels for display
   const formatLabel = (label: string) => {
+    if (!label) return "Non spécifié";
+    
+    const labelMap: Record<string, string> = {
+      // Gender
+      'male': 'Homme',
+      'female': 'Femme',
+      
+      // Education
+      'high-school': 'Lycée',
+      'some-college': 'Formation sup.',
+      'bachelors': 'Licence',
+      'masters': 'Master',
+      'doctorate': 'Doctorat',
+      'other': 'Autre',
+      
+      // Knowledge
+      'none': 'Aucune',
+      'basic': 'Basique',
+      'intermediate': 'Intermédiaire',
+      'advanced': 'Avancée',
+      'expert': 'Expert',
+      
+      // Risk tolerance
+      'very-low': 'Très faible',
+      'low': 'Faible',
+      'moderate': 'Modérée',
+      'high': 'Élevée',
+      'very-high': 'Très élevée',
+      
+      // Investment goals
+      'retirement': 'Retraite',
+      'wealth-preservation': 'Préservation',
+      'passive-income': 'Revenu passif',
+      'capital-growth': 'Croissance',
+      'financial-security': 'Sécurité',
+      
+      // Sectors
+      'technology': 'Technologie',
+      'healthcare': 'Santé',
+      'finance': 'Finance',
+      'education': 'Éducation',
+      'manufacturing': 'Industrie',
+      'retail': 'Commerce',
+      'government': 'Administration',
+      'non-profit': 'Association'
+    };
+    
+    if (labelMap[label]) {
+      return labelMap[label];
+    }
+    
     return label
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  };
+
+  // Custom pie chart label renderer
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 10;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        fill="#888"
+        fontSize={12}
+      >
+        {`${formatLabel(name)} (${(percent * 100).toFixed(0)}%)`}
+      </text>
+    );
   };
 
   return (
@@ -87,7 +183,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
         {/* Age Group Distribution */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Age Group Distribution</CardTitle>
+            <CardTitle className="text-lg">Distribution par âge</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -101,13 +197,13 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name }) => formatLabel(name)}
+                    label={renderCustomizedLabel}
                   >
                     {ageGroupData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value} responses`, 'Count']} />
+                  <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -117,7 +213,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
         {/* Gender Distribution */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Gender Distribution</CardTitle>
+            <CardTitle className="text-lg">Distribution par genre</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -131,13 +227,13 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name }) => formatLabel(name)}
+                    label={renderCustomizedLabel}
                   >
                     {genderData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value} responses`, 'Count']} />
+                  <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -147,7 +243,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
         {/* Education Level */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Education Level</CardTitle>
+            <CardTitle className="text-lg">Niveau d'éducation</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -161,13 +257,13 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name }) => formatLabel(name)}
+                    label={renderCustomizedLabel}
                   >
                     {educationData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value} responses`, 'Count']} />
+                  <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -176,17 +272,17 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Knowledge Level */}
+        {/* Professional Sector */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Self-Rated Knowledge Level</CardTitle>
+            <CardTitle className="text-lg">Secteur professionnel</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={knowledgeLevelData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+                  data={sectorData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
@@ -197,7 +293,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
                     tickFormatter={formatLabel} 
                   />
                   <YAxis />
-                  <Tooltip formatter={(value) => [`${value} responses`, 'Count']} />
+                  <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
                   <Bar dataKey="value" fill="#3b82f6" />
                 </BarChart>
               </ResponsiveContainer>
@@ -205,10 +301,41 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
           </CardContent>
         </Card>
 
+        {/* Knowledge Level */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Niveau de connaissance auto-évalué</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={knowledgeLevelData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={70}
+                    tickFormatter={formatLabel} 
+                  />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
+                  <Bar dataKey="value" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Previous Experience */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Previous Investment Experience</CardTitle>
+            <CardTitle className="text-lg">Expérience préalable en investissement</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -221,32 +348,61 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={renderCustomizedLabel}
                   >
                     {experienceData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value} responses`, 'Count']} />
+                  <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
+
+        {/* Risk Tolerance */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Tolérance au risque</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={riskToleranceData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={70}
+                    tickFormatter={formatLabel} 
+                  />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
+                  <Bar dataKey="value" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Risk Tolerance */}
+      {/* Investment Goals */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Risk Tolerance Distribution</CardTitle>
+          <CardTitle className="text-lg">Objectifs d'investissement préférés</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={riskToleranceData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+                data={investmentGoalsData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
@@ -257,7 +413,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses, filters }) => 
                   tickFormatter={formatLabel} 
                 />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${value} responses`, 'Count']} />
+                <Tooltip formatter={(value) => [`${value} réponses`, 'Nombre']} />
                 <Bar dataKey="value" fill="#3b82f6" />
               </BarChart>
             </ResponsiveContainer>

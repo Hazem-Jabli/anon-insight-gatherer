@@ -9,11 +9,11 @@ interface HeaderProps {
 
 const Header: FC<HeaderProps> = ({ isAdmin = false }) => {
   return (
-    <header className="w-full py-4 px-6 bg-white shadow-sm">
+    <header className="w-full py-4 px-6 bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <h1 className="text-xl font-semibold text-survey-dark">
-            {isAdmin ? "Survey Admin Dashboard" : "Investment Credit Survey"}
+          <h1 className="text-xl font-semibold text-survey-dark dark:text-white">
+            {isAdmin ? "Tableau de Bord Administrateur" : "Sondage sur le Crédit d'Investissement"}
           </h1>
         </div>
         <nav>
@@ -22,17 +22,17 @@ const Header: FC<HeaderProps> = ({ isAdmin = false }) => {
               <Link 
                 to="/" 
                 className={`transition-colors hover:text-survey-primary ${
-                  !isAdmin ? 'text-survey-primary font-medium' : 'text-gray-600'
+                  !isAdmin ? 'text-survey-primary font-medium' : 'text-gray-600 dark:text-gray-300'
                 }`}
               >
-                Survey
+                Sondage
               </Link>
             </li>
             <li>
               <Link 
                 to="/admin" 
                 className={`transition-colors hover:text-survey-primary ${
-                  isAdmin ? 'text-survey-primary font-medium' : 'text-gray-600'
+                  isAdmin ? 'text-survey-primary font-medium' : 'text-gray-600 dark:text-gray-300'
                 }`}
               >
                 Admin

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
-import { Radio } from '@/components/ui/radio';
+import { RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { 
   Select,
@@ -25,10 +25,10 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
   return (
     <Card className="mb-6">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold text-survey-dark">Informations Démographiques</CardTitle>
+        <CardTitle className="text-xl font-semibold text-survey-dark dark:text-gray-100">Informations Démographiques</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* Sélection du Genre */}
+        {/* Sélection du Genre - simplifié à homme/femme */}
         <div className="space-y-3">
           <Label htmlFor="gender" className="block text-sm font-medium mb-2">
             Genre
@@ -40,11 +40,11 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
             className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
-              <Radio value="male" id="gender-male" />
+              <RadioGroupItem value="male" id="gender-male" />
               <Label htmlFor="gender-male">Homme</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="female" id="gender-female" />
+              <RadioGroupItem value="female" id="gender-female" />
               <Label htmlFor="gender-female">Femme</Label>
             </div>
           </RadioGroup>

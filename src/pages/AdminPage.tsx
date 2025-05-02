@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FilterControls from '@/components/admin/FilterControls';
@@ -9,42 +10,125 @@ import {
   getAllSurveyResponses, 
   clearAllSurveyData,
   exportSurveyDataAsJSON,
-  exportSurveyDataAsCSV
+  exportSurveyDataAsCSV,
+  saveSurveyResponse
 } from '@/lib/localStorage';
-import { SurveyResponse } from '@/types/survey';
+import { SurveyResponse, emptySurveyResponse } from '@/types/survey';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
+// Fonction pour générer des données aléatoires
+const generateDummyData = (count = 10) => {
+  const genders = ['male', 'female'];
+  const ageGroups = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+  const educationLevels = ['high-school', 'some-college', 'bachelors', 'masters', 'doctorate', 'other'];
+  const sectors = ['technology', 'healthcare', 'finance', 'education', 'manufacturing', 'retail', 'government', 'non-profit', 'other'];
+  const knowledgeLevels = ['none', 'basic', 'intermediate', 'advanced', 'expert'];
+  const frequencies = ['never', 'rarely', 'occasionally', 'frequently', 'regularly'];
+  const riskTolerances = ['very-low', 'low', 'moderate', 'high', 'very-high'];
+  const investmentTypes = ['stocks', 'bonds', 'mutual-funds', 'etfs', 'real-estate', 'crypto', 'retirement', 'commodities'];
+  const investmentGoals = ['retirement', 'wealth-preservation', 'passive-income', 'capital-growth', 'financial-security'];
+  
+  const getRandomElement = (array: any[]) => array[Math.floor(Math.random() * array.length)];
+  const getRandomMultiple = (array: any[], min = 1, max = 3) => {
+    const count = Math.floor(Math.random() * (max - min + 1)) + min;
+    const result = [];
+    const shuffled = [...array].sort(() => 0.5 - Math.random());
+    for (let i = 0; i < count && i < shuffled.length; i++) {
+      result.push(shuffled[i]);
+    }
+    return result;
+  };
+  
+  const dummyData: SurveyResponse[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    const datePast = new Date();
+    datePast.setDate(datePast.getDate() - Math.random() * 30); // Date aléatoire dans les 30 derniers jours
+    
+    const response: SurveyResponse = {
+      ...emptySurveyResponse,
+      id: uuidv4(),
+      submittedAt: datePast.toISOString(),
+      demographics: {
+        gender: getRandomElement(genders),
+        ageGroup: getRandomElement(ageGroups),
+        educationLevel: getRandomElement(educationLevels),
+        professionalSector: getRandomElement(sectors)
+      },
+      investmentKnowledge: {
+        selfRatedKnowledge: getRandomElement(knowledgeLevels),
+        previousExperience: Math.random() > 0.5,
+        frequencyOfInvestment: getRandomElement(frequencies),
+        preferredInvestmentTypes: getRandomMultiple(investmentTypes)
+      },
+      opinions: {
+        riskTolerance: getRandomElement(riskTolerances),
+        importantFeatures: getRandomMultiple(['low-interest', 'flexibility', 'tax-benefits', 'ease-of-access', 'low-fees']),
+        preferredInvestmentGoals: getRandomMultiple(investmentGoals),
+        willRecommend: Math.floor(Math.random() * 11) // 0-10
+      }
+    };
+    
+    dummyData.push(response);
+  }
+  
+  return dummyData;
+};
 
 const AdminPage = () => {
-  // État pour stocker les réponses au sondage
+  // États pour les données et les filtres
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [pin, setPin] = useState('');
+  const correctPin = '223344';
   
   // État pour les filtres
   const [filters, setFilters] = useState({
     gender: null as string | null,
     ageGroup: null as string | null,
-    educationLevel: null as string | null
+    educationLevel: null as string | null,
+    professionalSector: null as string | null
   });
   
-  // Charger les réponses au montage
+  // Charger les réponses au montage (si authentifié)
   useEffect(() => {
-    // Ignorer si exécuté sur le serveur
-    if (typeof window === 'undefined') return;
-    
-    loadResponses();
-  }, []);
+    if (authenticated) {
+      loadResponses();
+    }
+  }, [authenticated]);
+  
+  // Vérifier le PIN
+  const verifyPin = () => {
+    if (pin === correctPin) {
+      setAuthenticated(true);
+      toast.success("Authentification réussie");
+    } else {
+      toast.error("PIN incorrect");
+    }
+  };
   
   // Charger toutes les réponses depuis localStorage
   const loadResponses = () => {
     try {
-      const loadedResponses = getAllSurveyResponses();
-      setResponses(loadedResponses);
+      let loadedResponses = getAllSurveyResponses();
       
+      // Si aucune réponse n'est trouvée, générer des données de démonstration
       if (loadedResponses.length === 0) {
-        toast("Aucune réponse au sondage trouvée", {
-          description: "En attente de soumission de réponses"
+        loadedResponses = generateDummyData(10);
+        
+        // Enregistrer les données de démonstration
+        loadedResponses.forEach(response => {
+          saveSurveyResponse(response);
         });
+        
+        toast.success(`10 réponses de démonstration générées`);
       } else {
         toast.success(`${loadedResponses.length} réponses au sondage chargées`);
       }
+      
+      setResponses(loadedResponses);
     } catch (error) {
       console.error("Erreur lors du chargement des réponses au sondage:", error);
       toast.error("Erreur lors du chargement des données du sondage");
@@ -64,7 +148,8 @@ const AdminPage = () => {
     setFilters({
       gender: null,
       ageGroup: null,
-      educationLevel: null
+      educationLevel: null,
+      professionalSector: null
     });
     toast("Filtres réinitialisés");
   };
@@ -132,27 +217,58 @@ const AdminPage = () => {
           </p>
         </div>
         
-        {/* Contrôles de Filtrage et d'Exportation */}
-        <FilterControls 
-          onFilterChange={handleFilterChange}
-          onResetFilters={handleResetFilters}
-          onResetData={handleResetData}
-          onExportData={handleExportData}
-          filters={filters}
-          responseCount={responses.length}
-        />
-        
-        {/* Statistiques des Réponses */}
-        {responses.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-sm text-center">
-            <p className="text-gray-600 dark:text-gray-400 mb-3">Aucune réponse au sondage disponible.</p>
-            <p className="text-gray-500 dark:text-gray-500">Demandez aux participants de compléter le sondage pour voir les résultats ici.</p>
-          </div>
+        {!authenticated ? (
+          <Card className="max-w-md mx-auto">
+            <CardHeader>
+              <CardTitle>Authentification requise</CardTitle>
+              <CardDescription>Veuillez saisir le code PIN pour accéder au tableau de bord administrateur</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="pin">Code PIN (6 chiffres)</Label>
+                <Input 
+                  id="pin" 
+                  type="password" 
+                  value={pin} 
+                  onChange={(e) => setPin(e.target.value)}
+                  placeholder="Entrez le code PIN"
+                  maxLength={6}
+                  className="text-center text-xl tracking-widest"
+                />
+              </div>
+              <Button 
+                onClick={verifyPin} 
+                className="w-full"
+              >
+                Accéder au tableau de bord
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
-          <ResponseStats 
-            responses={responses}
-            filters={filters}
-          />
+          <>
+            {/* Contrôles de Filtrage et d'Exportation */}
+            <FilterControls 
+              onFilterChange={handleFilterChange}
+              onResetFilters={handleResetFilters}
+              onResetData={handleResetData}
+              onExportData={handleExportData}
+              filters={filters}
+              responseCount={responses.length}
+            />
+            
+            {/* Statistiques des Réponses */}
+            {responses.length === 0 ? (
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-sm text-center">
+                <p className="text-gray-600 dark:text-gray-400 mb-3">Aucune réponse au sondage disponible.</p>
+                <p className="text-gray-500 dark:text-gray-500">Demandez aux participants de compléter le sondage pour voir les résultats ici.</p>
+              </div>
+            ) : (
+              <ResponseStats 
+                responses={responses}
+                filters={filters}
+              />
+            )}
+          </>
         )}
       </main>
       

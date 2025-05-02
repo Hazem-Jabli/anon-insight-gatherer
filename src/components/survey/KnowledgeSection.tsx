@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
-import { Radio } from '@/components/ui/radio';
+import { RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,11 +52,11 @@ const KnowledgeSection: React.FC<KnowledgeSectionProps> = ({
   return (
     <Card className="mb-6">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold text-survey-dark">
+        <CardTitle className="text-xl font-semibold text-survey-dark dark:text-gray-100">
           Connaissances et Expérience en Investissement
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
+      <CardContent className="space-y-12">
         {/* Connaissance auto-évaluée */}
         <div className="space-y-3">
           <Label htmlFor="knowledge-level" className="block text-sm font-medium mb-2">
@@ -69,23 +69,23 @@ const KnowledgeSection: React.FC<KnowledgeSectionProps> = ({
             className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
-              <Radio value="none" id="knowledge-none" />
+              <RadioGroupItem value="none" id="knowledge-none" />
               <Label htmlFor="knowledge-none">Aucune</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="basic" id="knowledge-basic" />
+              <RadioGroupItem value="basic" id="knowledge-basic" />
               <Label htmlFor="knowledge-basic">Basique</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="intermediate" id="knowledge-intermediate" />
+              <RadioGroupItem value="intermediate" id="knowledge-intermediate" />
               <Label htmlFor="knowledge-intermediate">Intermédiaire</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="advanced" id="knowledge-advanced" />
+              <RadioGroupItem value="advanced" id="knowledge-advanced" />
               <Label htmlFor="knowledge-advanced">Avancée</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="expert" id="knowledge-expert" />
+              <RadioGroupItem value="expert" id="knowledge-expert" />
               <Label htmlFor="knowledge-expert">Expert</Label>
             </div>
           </RadioGroup>
@@ -103,11 +103,11 @@ const KnowledgeSection: React.FC<KnowledgeSectionProps> = ({
             className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
-              <Radio value="yes" id="experience-yes" />
+              <RadioGroupItem value="yes" id="experience-yes" />
               <Label htmlFor="experience-yes">Oui</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="no" id="experience-no" />
+              <RadioGroupItem value="no" id="experience-no" />
               <Label htmlFor="experience-no">Non</Label>
             </div>
           </RadioGroup>
@@ -125,23 +125,23 @@ const KnowledgeSection: React.FC<KnowledgeSectionProps> = ({
             className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-2">
-              <Radio value="never" id="frequency-never" />
+              <RadioGroupItem value="never" id="frequency-never" />
               <Label htmlFor="frequency-never">Jamais</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="rarely" id="frequency-rarely" />
+              <RadioGroupItem value="rarely" id="frequency-rarely" />
               <Label htmlFor="frequency-rarely">Rarement</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="occasionally" id="frequency-occasionally" />
+              <RadioGroupItem value="occasionally" id="frequency-occasionally" />
               <Label htmlFor="frequency-occasionally">Occasionnellement</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="frequently" id="frequency-frequently" />
+              <RadioGroupItem value="frequently" id="frequency-frequently" />
               <Label htmlFor="frequency-frequently">Fréquemment</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Radio value="regularly" id="frequency-regularly" />
+              <RadioGroupItem value="regularly" id="frequency-regularly" />
               <Label htmlFor="frequency-regularly">Régulièrement</Label>
             </div>
           </RadioGroup>

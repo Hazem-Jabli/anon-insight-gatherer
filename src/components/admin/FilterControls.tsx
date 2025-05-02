@@ -20,6 +20,7 @@ interface FilterControlsProps {
     ageGroup: string | null;
     educationLevel: string | null;
     gender: string | null;
+    professionalSector: string | null;
   };
   responseCount: number;
 }
@@ -36,8 +37,8 @@ const FilterControls: React.FC<FilterControlsProps> = ({
     <Card className="mb-6">
       <CardContent className="pt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Contrôles de Filtres - Colonne Gauche */}
-          <div className="flex flex-col gap-4">
+          {/* Filtres - Colonne Gauche */}
+          <div className="space-y-4">
             <h3 className="font-medium text-base">Filtres</h3>
             
             <div>
@@ -77,6 +78,11 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          
+          {/* Filtres - Colonne Droite */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-base">Filtres supplémentaires</h3>
             
             <div>
               <Label htmlFor="filter-education" className="mb-2 block">Éducation</Label>
@@ -100,57 +106,69 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             </div>
             
             <div>
-              <Button 
-                variant="outline"
-                onClick={onResetFilters}
-                className="w-full"
+              <Label htmlFor="filter-sector" className="mb-2 block">Secteur professionnel</Label>
+              <Select
+                value={filters.professionalSector || 'all-sectors'}
+                onValueChange={(value) => onFilterChange('professionalSector', value === 'all-sectors' ? null : value)}
               >
-                Réinitialiser les filtres
-              </Button>
+                <SelectTrigger id="filter-sector" className="w-full">
+                  <SelectValue placeholder="Tous les secteurs" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-sectors">Tous les secteurs</SelectItem>
+                  <SelectItem value="technology">Technologie</SelectItem>
+                  <SelectItem value="healthcare">Santé</SelectItem>
+                  <SelectItem value="finance">Finance</SelectItem>
+                  <SelectItem value="education">Éducation</SelectItem>
+                  <SelectItem value="manufacturing">Industrie</SelectItem>
+                  <SelectItem value="retail">Commerce</SelectItem>
+                  <SelectItem value="government">Administration</SelectItem>
+                  <SelectItem value="non-profit">Association</SelectItem>
+                  <SelectItem value="other">Autre</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+        </div>
+        
+        {/* Boutons de gestion - En bas */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Button 
+            variant="outline"
+            onClick={onResetFilters}
+            className="w-full"
+          >
+            Réinitialiser les filtres
+          </Button>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              variant="outline"
+              onClick={() => onExportData('json')}
+              disabled={responseCount === 0}
+              className="w-full"
+            >
+              Exporter JSON
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={() => onExportData('csv')}
+              disabled={responseCount === 0}
+              className="w-full"
+            >
+              Exporter CSV
+            </Button>
           </div>
           
-          {/* Contrôles de Gestion des Données - Colonne Droite */}
-          <div className="flex flex-col gap-4">
-            <h3 className="font-medium text-base">Gestion des données</h3>
-            
-            <div className="text-sm text-gray-500">
-              Total des réponses: <span className="font-medium">{responseCount}</span>
-            </div>
-            
-            <div>
-              <Button
-                variant="outline"
-                onClick={() => onExportData('json')}
-                disabled={responseCount === 0}
-                className="w-full mb-2"
-              >
-                Exporter en JSON
-              </Button>
-            </div>
-            
-            <div>
-              <Button
-                variant="outline"
-                onClick={() => onExportData('csv')}
-                disabled={responseCount === 0}
-                className="w-full mb-2"
-              >
-                Exporter en CSV
-              </Button>
-            </div>
-            
-            <div>
-              <Button
-                variant="destructive"
-                onClick={onResetData}
-                disabled={responseCount === 0}
-                className="w-full"
-              >
-                Effacer toutes les données
-              </Button>
-            </div>
-          </div>
+          <Button
+            variant="destructive"
+            onClick={onResetData}
+            disabled={responseCount === 0}
+            className="w-full md:col-span-2"
+          >
+            Effacer toutes les données
+          </Button>
         </div>
       </CardContent>
     </Card>
