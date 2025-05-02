@@ -153,11 +153,11 @@ const Index = () => {
         ) : (
           <>
             <div className="max-w-3xl mx-auto mb-6">
-              <div className="flex flex-col items-center mb-4">
-                <div className="absolute top-4 right-4 md:right-8">
+              <div className="flex flex-col items-center mb-4 relative">
+                <div className="absolute top-0 right-0">
                   <ThemeToggle />
                 </div>
-                <div className="text-center mt-4">
+                <div className="text-center mt-12">
                   <h1 className="text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
                     Sondage Anonyme sur le Crédit d'Investissement
                   </h1>
@@ -197,9 +197,9 @@ const Index = () => {
                     variant="outline"
                     onClick={handleResetForm}
                     size="sm"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 h-8 px-3 text-xs"
                   >
-                    <RotateCcw className="h-4 w-4" />
+                    <RotateCcw className="h-3 w-3" />
                     Reset
                   </Button>
                   
