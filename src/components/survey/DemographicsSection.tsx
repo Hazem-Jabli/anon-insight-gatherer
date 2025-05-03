@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { RadioGroup } from '@/components/ui/radio-group';
-import { RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { 
   Select,
@@ -27,29 +25,7 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
       <CardHeader>
         <CardTitle className="text-xl font-semibold text-survey-dark dark:text-gray-100">Informations Démographiques</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
-        {/* Sélection du Genre - simplifié à homme/femme */}
-        <div className="space-y-3">
-          <Label htmlFor="gender" className="block text-sm font-medium mb-2">
-            Genre
-          </Label>
-          <RadioGroup 
-            id="gender"
-            value={surveyData.demographics.gender}
-            onValueChange={(value) => updateSurveyData('demographics.gender', value)}
-            className="flex flex-col space-y-3"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="male" id="gender-male" />
-              <Label htmlFor="gender-male">Homme</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="female" id="gender-female" />
-              <Label htmlFor="gender-female">Femme</Label>
-            </div>
-          </RadioGroup>
-        </div>
-        
+      <CardContent className="space-y-6">
         {/* Menu déroulant Groupe d'âge */}
         <div className="space-y-3">
           <Label htmlFor="age-group" className="block text-sm font-medium mb-2">
@@ -59,7 +35,7 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
             value={surveyData.demographics.ageGroup}
             onValueChange={(value) => updateSurveyData('demographics.ageGroup', value)}
           >
-            <SelectTrigger className="w-full sm:w-[240px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Sélectionner un groupe d'âge" />
             </SelectTrigger>
             <SelectContent id="age-group">
@@ -82,7 +58,7 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
             value={surveyData.demographics.educationLevel}
             onValueChange={(value) => updateSurveyData('demographics.educationLevel', value)}
           >
-            <SelectTrigger className="w-full sm:w-[240px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Sélectionner un niveau d'éducation" />
             </SelectTrigger>
             <SelectContent id="education-level">
@@ -105,7 +81,7 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
             value={surveyData.demographics.professionalSector}
             onValueChange={(value) => updateSurveyData('demographics.professionalSector', value)}
           >
-            <SelectTrigger className="w-full sm:w-[240px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Sélectionner un secteur" />
             </SelectTrigger>
             <SelectContent id="professional-sector">

@@ -6,11 +6,9 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import DemographicsSection from '@/components/survey/DemographicsSection';
 import KnowledgeSection from '@/components/survey/KnowledgeSection';
-import OpinionsSection from '@/components/survey/OpinionsSection';
 import ThemeToggle from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { emptySurveyResponse, SurveyResponse } from '@/types/survey';
 import { RotateCcw, Send } from 'lucide-react';
@@ -131,7 +129,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header />
       
-      <main className="flex-grow container mx-auto p-4 sm:p-6">
+      <main className="flex-grow container mx-auto px-4 py-6 sm:px-6">
         {submitted ? (
           <Card className="max-w-2xl mx-auto mt-8">
             <CardHeader>
@@ -154,11 +152,11 @@ const Index = () => {
           <>
             <div className="max-w-3xl mx-auto mb-6">
               <div className="flex flex-col items-center mb-4 relative">
-                <div className="absolute top-0 right-0">
+                <div className="absolute top-0 right-0 z-10">
                   <ThemeToggle />
                 </div>
-                <div className="text-center mt-12">
-                  <h1 className="text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
+                <div className="text-center mt-12 px-4">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
                     Sondage Anonyme sur le Crédit d'Investissement
                   </h1>
                   <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
@@ -175,18 +173,13 @@ const Index = () => {
                 </AlertDescription>
               </Alert>
               
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="px-2">
                 <DemographicsSection 
                   surveyData={surveyData} 
                   updateSurveyData={updateSurveyData} 
                 />
                 
                 <KnowledgeSection 
-                  surveyData={surveyData} 
-                  updateSurveyData={updateSurveyData} 
-                />
-                
-                <OpinionsSection 
                   surveyData={surveyData} 
                   updateSurveyData={updateSurveyData} 
                 />
@@ -206,7 +199,7 @@ const Index = () => {
                   <Button 
                     type="submit" 
                     size="lg"
-                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-10"
+                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-8 sm:px-10"
                   >
                     <Send className="h-4 w-4" />
                     Soumettre le sondage
