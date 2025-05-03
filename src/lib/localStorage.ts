@@ -115,10 +115,6 @@ export const exportSurveyDataAsCSV = (): string => {
     'Age Group',
     'Education Level',
     'Professional Sector',
-    'Self-Rated Knowledge',
-    'Previous Experience',
-    'Investment Frequency',
-    'Preferred Investment Types',
     'Additional Feedback'
   ];
   
@@ -133,10 +129,6 @@ export const exportSurveyDataAsCSV = (): string => {
       response.demographics.ageGroup,
       response.demographics.educationLevel,
       response.demographics.professionalSector,
-      response.investmentKnowledge.selfRatedKnowledge,
-      response.investmentKnowledge.previousExperience ? 'Yes' : 'No',
-      response.investmentKnowledge.frequencyOfInvestment,
-      response.investmentKnowledge.preferredInvestmentTypes.join(';'),
       response.additionalFeedback || ''
     ];
     

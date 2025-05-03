@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import DemographicsSection from '@/components/survey/DemographicsSection';
-import KnowledgeSection from '@/components/survey/KnowledgeSection';
 import ThemeToggle from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -175,11 +174,6 @@ const Index = () => {
               
               <form onSubmit={handleSubmit} className="px-2">
                 <DemographicsSection 
-                  surveyData={surveyData} 
-                  updateSurveyData={updateSurveyData} 
-                />
-                
-                <KnowledgeSection 
                   surveyData={surveyData} 
                   updateSurveyData={updateSurveyData} 
                 />

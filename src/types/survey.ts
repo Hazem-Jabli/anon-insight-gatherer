@@ -7,10 +7,6 @@ export type EducationLevel = 'high-school' | 'some-college' | 'bachelors' | 'mas
 export type ProfessionalSector = 'technology' | 'healthcare' | 'finance' | 'education' | 'manufacturing' | 
                                'retail' | 'government' | 'non-profit' | 'other';
 
-// Survey specific types
-export type KnowledgeLevel = 'none' | 'basic' | 'intermediate' | 'advanced' | 'expert';
-export type InvestmentFrequency = 'never' | 'rarely' | 'occasionally' | 'frequently' | 'regularly';
-
 export interface SurveyResponse {
   // Unique identifier for the response
   id: string;
@@ -23,14 +19,6 @@ export interface SurveyResponse {
     ageGroup: AgeGroup;
     educationLevel: EducationLevel;
     professionalSector: ProfessionalSector;
-  };
-  
-  // Knowledge and experience
-  investmentKnowledge: {
-    selfRatedKnowledge: KnowledgeLevel;
-    previousExperience: boolean;
-    frequencyOfInvestment: InvestmentFrequency;
-    preferredInvestmentTypes: string[];
   };
   
   // Additional feedback
@@ -51,12 +39,6 @@ export const emptySurveyResponse: SurveyResponse = {
     ageGroup: '25-34',
     educationLevel: 'bachelors',
     professionalSector: 'other',
-  },
-  investmentKnowledge: {
-    selfRatedKnowledge: 'basic',
-    previousExperience: false,
-    frequencyOfInvestment: 'never',
-    preferredInvestmentTypes: [],
   },
   additionalFeedback: '',
 };

@@ -31,27 +31,10 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
     return counts;
   }, {} as { [key: string]: number });
 
-  // Calculate average investment knowledge from self-rated knowledge
-  const totalInvestmentKnowledge = responses.reduce((sum, response) => {
-    // Convert string ratings to numbers (1-5 scale)
-    const ratingMap: { [key: string]: number } = {
-      'none': 1,
-      'basic': 2,
-      'intermediate': 3,
-      'advanced': 4,
-      'expert': 5
-    };
-    const rating = response.investmentKnowledge?.selfRatedKnowledge || '';
-    return sum + (ratingMap[rating] || 0);
-  }, 0);
-  const averageInvestmentKnowledge = responses.length > 0 ? totalInvestmentKnowledge / responses.length : 0;
-
-  // Aggregate preferred investment types
-  const investmentTypeCounts = responses.reduce((counts, response) => {
-    const investmentTypes = response.investmentKnowledge?.preferredInvestmentTypes || [];
-    investmentTypes.forEach(type => {
-      counts[type] = (counts[type] || 0) + 1;
-    });
+  // Count professional sector distribution
+  const sectorCounts = responses.reduce((counts, response) => {
+    const sector = response.demographics?.professionalSector || 'Unknown';
+    counts[sector] = (counts[sector] || 0) + 1;
     return counts;
   }, {} as { [key: string]: number });
 
@@ -72,14 +55,12 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
           </ul>
         </div>
 
-        {/* Knowledge Stats */}
+        {/* Professional Sector Stats */}
         <div className="bg-white shadow-md rounded-md p-4">
-          <h3 className="text-lg font-semibold mb-2">Connaissances</h3>
-          <p>Niveau Moyen de Connaissance en Investissement: {averageInvestmentKnowledge.toFixed(2)}</p>
-          <p>Types d'Investissement Préférés:</p>
+          <h3 className="text-lg font-semibold mb-2">Secteurs Professionnels</h3>
           <ul>
-            {Object.entries(investmentTypeCounts).map(([type, count]) => (
-              <li key={type}>{type}: {count}</li>
+            {Object.entries(sectorCounts).map(([sector, count]) => (
+              <li key={sector}>{sector}: {count}</li>
             ))}
           </ul>
         </div>

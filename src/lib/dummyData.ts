@@ -4,20 +4,12 @@ import {
   SurveyResponse, 
   AgeGroup, 
   EducationLevel, 
-  ProfessionalSector,
-  KnowledgeLevel,
-  InvestmentFrequency
+  ProfessionalSector
 } from '@/types/survey';
 
 // Helper function to get random item from array
 const getRandomItem = <T>(items: T[]): T => {
   return items[Math.floor(Math.random() * items.length)];
-};
-
-// Helper function to get random items from array (1 to max items)
-const getRandomItems = <T>(items: T[], max: number = 3): T[] => {
-  const shuffled = [...items].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, Math.floor(Math.random() * max) + 1);
 };
 
 // Generate random date in the last 30 days
@@ -32,9 +24,6 @@ export const generateDummyData = (count: number): SurveyResponse[] => {
   const educationLevels: EducationLevel[] = ['high-school', 'some-college', 'bachelors', 'masters', 'doctorate', 'other'];
   const professionalSectors: ProfessionalSector[] = ['technology', 'healthcare', 'finance', 'education', 'manufacturing', 
                                                 'retail', 'government', 'non-profit', 'other'];
-  const knowledgeLevels: KnowledgeLevel[] = ['none', 'basic', 'intermediate', 'advanced', 'expert'];
-  const investmentFrequencies: InvestmentFrequency[] = ['never', 'rarely', 'occasionally', 'frequently', 'regularly'];
-  const investmentTypes = ['stocks', 'bonds', 'real-estate', 'crypto', 'mutual-funds', 'etfs', 'retirement', 'commodities'];
   
   const responses: SurveyResponse[] = [];
 
@@ -46,12 +35,6 @@ export const generateDummyData = (count: number): SurveyResponse[] => {
         ageGroup: getRandomItem(ageGroups),
         educationLevel: getRandomItem(educationLevels),
         professionalSector: getRandomItem(professionalSectors),
-      },
-      investmentKnowledge: {
-        selfRatedKnowledge: getRandomItem(knowledgeLevels),
-        previousExperience: Math.random() > 0.5,
-        frequencyOfInvestment: getRandomItem(investmentFrequencies),
-        preferredInvestmentTypes: getRandomItems(investmentTypes, 4),
       },
       additionalFeedback: ''
     };
