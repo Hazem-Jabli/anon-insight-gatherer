@@ -64,7 +64,7 @@ const Index = () => {
   // Update survey data handler - supports nested properties with dot notation
   const updateSurveyData = (field: string, value: any) => {
     setSurveyData(prevData => {
-      // Handle nested properties using dot notation (e.g., 'demographics.gender')
+      // Handle nested properties using dot notation (e.g., 'demographics.ageGroup')
       if (field.includes('.')) {
         const [parent, child] = field.split('.');
         return {
@@ -152,22 +152,22 @@ const Index = () => {
           <>
             <div className="max-w-3xl mx-auto mb-6">
               <div className="flex flex-col items-center mb-4 relative">
-                <div className="absolute top-0 right-0 z-10">
+                <div className="absolute top-0 right-0 z-10 mt-2 mr-2">
                   <ThemeToggle />
                 </div>
-                <div className="text-center mt-12 px-4">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
+                <div className="text-center mt-12 px-4 sm:mt-16">
+                  <h1 className="text-xl sm:text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
                     Sondage Anonyme sur le Crédit d'Investissement
                   </h1>
-                  <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+                  <p className="text-center text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-6">
                     Aidez-nous à comprendre les perspectives sur le crédit d'investissement sans partager d'informations personnelles
                   </p>
                 </div>
               </div>
               
-              <Alert className="mb-8 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+              <Alert className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
                 <AlertTitle className="text-blue-800 dark:text-blue-300 font-medium">Avis de confidentialité</AlertTitle>
-                <AlertDescription className="text-blue-700 dark:text-blue-400">
+                <AlertDescription className="text-blue-700 dark:text-blue-400 text-sm">
                   Ce sondage est complètement anonyme. Aucune information personnelle identifiable n'est collectée.
                   Vos réponses sont stockées uniquement sur votre appareil et peuvent être effacées à tout moment.
                 </AlertDescription>
@@ -184,13 +184,13 @@ const Index = () => {
                   updateSurveyData={updateSurveyData} 
                 />
                 
-                <div className="mt-8 flex justify-center space-x-4">
+                <div className="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   <Button 
                     type="button" 
                     variant="outline"
                     onClick={handleResetForm}
                     size="sm"
-                    className="flex items-center gap-1 h-8 px-3 text-xs"
+                    className="flex items-center gap-1 h-8 px-3 text-xs w-full sm:w-auto"
                   >
                     <RotateCcw className="h-3 w-3" />
                     Reset
@@ -198,8 +198,7 @@ const Index = () => {
                   
                   <Button 
                     type="submit" 
-                    size="lg"
-                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-8 sm:px-10"
+                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-6 py-2 w-full sm:w-auto"
                   >
                     <Send className="h-4 w-4" />
                     Soumettre le sondage

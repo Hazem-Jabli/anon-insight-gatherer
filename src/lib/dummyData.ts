@@ -2,13 +2,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { 
   SurveyResponse, 
-  Gender, 
   AgeGroup, 
   EducationLevel, 
   ProfessionalSector,
   KnowledgeLevel,
-  InvestmentFrequency,
-  RiskTolerance
+  InvestmentFrequency
 } from '@/types/survey';
 
 // Helper function to get random item from array
@@ -30,7 +28,6 @@ const getRandomDate = (): string => {
 };
 
 export const generateDummyData = (count: number): SurveyResponse[] => {
-  const genders: Gender[] = ['male', 'female', 'non-binary', 'prefer-not-to-say'];
   const ageGroups: AgeGroup[] = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
   const educationLevels: EducationLevel[] = ['high-school', 'some-college', 'bachelors', 'masters', 'doctorate', 'other'];
   const professionalSectors: ProfessionalSector[] = ['technology', 'healthcare', 'finance', 'education', 'manufacturing', 
@@ -38,12 +35,7 @@ export const generateDummyData = (count: number): SurveyResponse[] => {
   const knowledgeLevels: KnowledgeLevel[] = ['none', 'basic', 'intermediate', 'advanced', 'expert'];
   const investmentFrequencies: InvestmentFrequency[] = ['never', 'rarely', 'occasionally', 'frequently', 'regularly'];
   const investmentTypes = ['stocks', 'bonds', 'real-estate', 'crypto', 'mutual-funds', 'etfs', 'retirement', 'commodities'];
-  const riskTolerances: RiskTolerance[] = ['very-low', 'low', 'moderate', 'high', 'very-high'];
   
-  const advantages = ['higher-returns', 'diversification', 'tax-benefits', 'leverage', 'professional-management', 'liquidity'];
-  const risks = ['market-volatility', 'interest-rate', 'leverage-risk', 'default', 'illiquidity', 'regulatory'];
-  const barriers = ['lack-knowledge', 'high-fees', 'min-requirements', 'risk-concerns', 'lack-advice', 'complex-terms', 'past-experience'];
-
   const responses: SurveyResponse[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -51,7 +43,6 @@ export const generateDummyData = (count: number): SurveyResponse[] => {
       id: uuidv4(),
       submittedAt: getRandomDate(),
       demographics: {
-        gender: getRandomItem(genders),
         ageGroup: getRandomItem(ageGroups),
         educationLevel: getRandomItem(educationLevels),
         professionalSector: getRandomItem(professionalSectors),
@@ -61,12 +52,6 @@ export const generateDummyData = (count: number): SurveyResponse[] => {
         previousExperience: Math.random() > 0.5,
         frequencyOfInvestment: getRandomItem(investmentFrequencies),
         preferredInvestmentTypes: getRandomItems(investmentTypes, 4),
-      },
-      opinions: {
-        riskTolerance: getRandomItem(riskTolerances),
-        perceivedAdvantages: getRandomItems(advantages, 3),
-        perceivedRisks: getRandomItems(risks, 3),
-        barriersToInvestment: getRandomItems(barriers, 3),
       },
       additionalFeedback: ''
     };

@@ -112,7 +112,6 @@ export const exportSurveyDataAsCSV = (): string => {
   const headers = [
     'ID',
     'Submitted At',
-    'Gender',
     'Age Group',
     'Education Level',
     'Professional Sector',
@@ -120,10 +119,6 @@ export const exportSurveyDataAsCSV = (): string => {
     'Previous Experience',
     'Investment Frequency',
     'Preferred Investment Types',
-    'Risk Tolerance',
-    'Perceived Advantages',
-    'Perceived Risks',
-    'Barriers to Investment',
     'Additional Feedback'
   ];
   
@@ -135,7 +130,6 @@ export const exportSurveyDataAsCSV = (): string => {
     const row = [
       response.id,
       response.submittedAt,
-      response.demographics.gender,
       response.demographics.ageGroup,
       response.demographics.educationLevel,
       response.demographics.professionalSector,
@@ -143,10 +137,6 @@ export const exportSurveyDataAsCSV = (): string => {
       response.investmentKnowledge.previousExperience ? 'Yes' : 'No',
       response.investmentKnowledge.frequencyOfInvestment,
       response.investmentKnowledge.preferredInvestmentTypes.join(';'),
-      response.opinions.riskTolerance,
-      response.opinions.perceivedAdvantages.join(';'),
-      response.opinions.perceivedRisks.join(';'),
-      response.opinions.barriersToInvestment.join(';'),
       response.additionalFeedback || ''
     ];
     

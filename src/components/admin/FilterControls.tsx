@@ -19,7 +19,6 @@ interface FilterControlsProps {
   filters: {
     ageGroup: string | null;
     educationLevel: string | null;
-    gender: string | null;
     professionalSector: string | null;
   };
   responseCount: number;
@@ -42,25 +41,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             <h3 className="font-medium text-base">Filtres</h3>
             
             <div>
-              <Label htmlFor="filter-gender" className="mb-2 block">Genre</Label>
-              <Select
-                value={filters.gender || 'all-genders'}
-                onValueChange={(value) => onFilterChange('gender', value === 'all-genders' ? null : value)}
-              >
-                <SelectTrigger id="filter-gender" className="w-full">
-                  <SelectValue placeholder="Tous les genres" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all-genders">Tous les genres</SelectItem>
-                  <SelectItem value="male">Homme</SelectItem>
-                  <SelectItem value="female">Femme</SelectItem>
-                  <SelectItem value="non-binary">Non-binaire</SelectItem>
-                  <SelectItem value="prefer-not-to-say">Préfère ne pas dire</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
               <Label htmlFor="filter-age" className="mb-2 block">Groupe d'âge</Label>
               <Select
                 value={filters.ageGroup || 'all-ages'}
@@ -80,11 +60,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          {/* Filtres - Colonne Droite */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-base">Filtres supplémentaires</h3>
             
             <div>
               <Label htmlFor="filter-education" className="mb-2 block">Éducation</Label>
@@ -106,6 +81,11 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          
+          {/* Filtres - Colonne Droite */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-base">Filtres supplémentaires</h3>
             
             <div>
               <Label htmlFor="filter-sector" className="mb-2 block">Secteur professionnel</Label>

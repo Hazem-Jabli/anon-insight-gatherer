@@ -27,7 +27,6 @@ const AdminPage = () => {
   const [filters, setFilters] = useState({
     ageGroup: null as string | null,
     educationLevel: null as string | null,
-    gender: null as string | null,
     professionalSector: null as string | null
   });
 
@@ -61,10 +60,6 @@ const AdminPage = () => {
   const applyFilters = () => {
     let result = [...responses];
     
-    if (filters.gender) {
-      result = result.filter(r => r.demographics?.gender === filters.gender);
-    }
-    
     if (filters.ageGroup) {
       result = result.filter(r => r.demographics?.ageGroup === filters.ageGroup);
     }
@@ -91,7 +86,6 @@ const AdminPage = () => {
     setFilters({
       ageGroup: null,
       educationLevel: null,
-      gender: null,
       professionalSector: null
     });
   };
@@ -119,11 +113,10 @@ const AdminPage = () => {
       filename = "survey_responses.json";
     } else if (format === 'csv') {
       // Simple CSV export (would need more robust handling for complex nested data)
-      const headers = ["id", "submittedAt", "gender", "ageGroup", "educationLevel", "professionalSector"];
+      const headers = ["id", "submittedAt", "ageGroup", "educationLevel", "professionalSector"];
       const csvData = responses.map(r => [
         r.id,
         r.submittedAt,
-        r.demographics?.gender || '',
         r.demographics?.ageGroup || '',
         r.demographics?.educationLevel || '',
         r.demographics?.professionalSector || '',

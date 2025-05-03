@@ -24,13 +24,6 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
   }, 0);
   const averageAge = responses.length > 0 ? totalAgeEstimate / responses.length : 0;
 
-  // Count gender distribution
-  const genderCounts = responses.reduce((counts, response) => {
-    const gender = response.demographics?.gender || 'Unknown';
-    counts[gender] = (counts[gender] || 0) + 1;
-    return counts;
-  }, {} as { [key: string]: number });
-
   // Count education level distribution
   const educationCounts = responses.reduce((counts, response) => {
     const education = response.demographics?.educationLevel || 'Unknown';
@@ -42,11 +35,11 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
   const totalInvestmentKnowledge = responses.reduce((sum, response) => {
     // Convert string ratings to numbers (1-5 scale)
     const ratingMap: { [key: string]: number } = {
-      'very-low': 1,
-      'low': 2,
-      'medium': 3,
-      'high': 4,
-      'very-high': 5
+      'none': 1,
+      'basic': 2,
+      'intermediate': 3,
+      'advanced': 4,
+      'expert': 5
     };
     const rating = response.investmentKnowledge?.selfRatedKnowledge || '';
     return sum + (ratingMap[rating] || 0);
@@ -62,16 +55,6 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
     return counts;
   }, {} as { [key: string]: number });
 
-  // Aggregate information sources
-  const informationSourceCounts = responses.reduce((counts, response) => {
-    // Get information sources from the opinions section if it exists
-    const sources = response.opinions?.perceivedAdvantages || [];
-    sources.forEach(source => {
-      counts[source] = (counts[source] || 0) + 1;
-    });
-    return counts;
-  }, {} as { [key: string]: number });
-
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Statistiques des Réponses</h2>
@@ -81,12 +64,6 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
         <div className="bg-white shadow-md rounded-md p-4">
           <h3 className="text-lg font-semibold mb-2">Démographiques</h3>
           <p>Âge Moyen Estimé: {averageAge.toFixed(2)}</p>
-          <p>Distribution par Genre:</p>
-          <ul>
-            {Object.entries(genderCounts).map(([gender, count]) => (
-              <li key={gender}>{gender}: {count}</li>
-            ))}
-          </ul>
           <p>Distribution par Niveau d'Éducation:</p>
           <ul>
             {Object.entries(educationCounts).map(([education, count]) => (
@@ -99,21 +76,10 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
         <div className="bg-white shadow-md rounded-md p-4">
           <h3 className="text-lg font-semibold mb-2">Connaissances</h3>
           <p>Niveau Moyen de Connaissance en Investissement: {averageInvestmentKnowledge.toFixed(2)}</p>
-        </div>
-
-        {/* Opinions Stats */}
-        <div className="bg-white shadow-md rounded-md p-4">
-          <h3 className="text-lg font-semibold mb-2">Opinions</h3>
           <p>Types d'Investissement Préférés:</p>
           <ul>
             {Object.entries(investmentTypeCounts).map(([type, count]) => (
               <li key={type}>{type}: {count}</li>
-            ))}
-          </ul>
-          <p>Sources d'Information:</p>
-          <ul>
-            {Object.entries(informationSourceCounts).map(([source, count]) => (
-              <li key={source}>{source}: {count}</li>
             ))}
           </ul>
         </div>
