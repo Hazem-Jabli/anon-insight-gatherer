@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Label } from '@/components/ui/label';
 import { 
   Select,
@@ -20,15 +21,19 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
   surveyData, 
   updateSurveyData 
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold text-survey-dark dark:text-gray-100">Informations Démographiques</CardTitle>
+    <Card className="mb-4 sm:mb-6">
+      <CardHeader className={isMobile ? "px-3 py-3" : undefined}>
+        <CardTitle className="text-lg sm:text-xl font-semibold text-survey-dark dark:text-gray-100">
+          Informations Démographiques
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className={`space-y-4 sm:space-y-6 ${isMobile ? "px-3 py-3" : undefined}`}>
         {/* Menu déroulant Groupe d'âge */}
-        <div className="space-y-3">
-          <Label htmlFor="age-group" className="block text-sm font-medium mb-2">
+        <div className="space-y-2 sm:space-y-3">
+          <Label htmlFor="age-group" className="block text-sm font-medium">
             Groupe d'âge
           </Label>
           <Select
@@ -50,8 +55,8 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
         </div>
         
         {/* Menu déroulant Niveau d'éducation */}
-        <div className="space-y-3">
-          <Label htmlFor="education-level" className="block text-sm font-medium mb-2">
+        <div className="space-y-2 sm:space-y-3">
+          <Label htmlFor="education-level" className="block text-sm font-medium">
             Niveau d'éducation
           </Label>
           <Select
@@ -73,8 +78,8 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
         </div>
         
         {/* Menu déroulant Secteur Professionnel */}
-        <div className="space-y-3">
-          <Label htmlFor="professional-sector" className="block text-sm font-medium mb-2">
+        <div className="space-y-2 sm:space-y-3">
+          <Label htmlFor="professional-sector" className="block text-sm font-medium">
             Secteur Professionnel
           </Label>
           <Select

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { emptySurveyResponse, SurveyResponse } from '@/types/survey';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { RotateCcw, Send } from 'lucide-react';
 import { 
   saveSurveyResponse, 
@@ -18,6 +19,8 @@ import {
 } from '@/lib/localStorage';
 
 const Index = () => {
+  const isMobile = useIsMobile();
+  
   // Initialize survey data state
   const [surveyData, setSurveyData] = useState<SurveyResponse>({
     ...emptySurveyResponse,
@@ -128,9 +131,9 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header />
       
-      <main className="flex-grow container mx-auto px-4 py-6 sm:px-6">
+      <main className="flex-grow container mx-auto px-3 sm:px-6 py-4 sm:py-6">
         {submitted ? (
-          <Card className="max-w-2xl mx-auto mt-8">
+          <Card className="max-w-2xl mx-auto mt-4 sm:mt-8">
             <CardHeader>
               <CardTitle>Merci pour votre participation!</CardTitle>
               <CardDescription>
@@ -149,36 +152,36 @@ const Index = () => {
           </Card>
         ) : (
           <>
-            <div className="max-w-3xl mx-auto mb-6">
+            <div className="max-w-3xl mx-auto mb-4 sm:mb-6">
               <div className="flex flex-col items-center mb-4 relative">
                 <div className="absolute top-0 right-0 z-10 mt-2 mr-2">
                   <ThemeToggle />
                 </div>
-                <div className="text-center mt-12 px-4 sm:mt-16">
-                  <h1 className="text-xl sm:text-3xl font-bold text-center text-survey-dark dark:text-white mb-2">
+                <div className="text-center mt-8 sm:mt-12 px-2 sm:px-4">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-center text-survey-dark dark:text-white mb-2 break-words">
                     Sondage Anonyme sur le Crédit d'Investissement
                   </h1>
-                  <p className="text-center text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-6">
+                  <p className="text-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">
                     Aidez-nous à comprendre les perspectives sur le crédit d'investissement sans partager d'informations personnelles
                   </p>
                 </div>
               </div>
               
-              <Alert className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+              <Alert className="mb-4 sm:mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
                 <AlertTitle className="text-blue-800 dark:text-blue-300 font-medium">Avis de confidentialité</AlertTitle>
-                <AlertDescription className="text-blue-700 dark:text-blue-400 text-sm">
+                <AlertDescription className="text-blue-700 dark:text-blue-400 text-xs sm:text-sm">
                   Ce sondage est complètement anonyme. Aucune information personnelle identifiable n'est collectée.
                   Vos réponses sont stockées uniquement sur votre appareil et peuvent être effacées à tout moment.
                 </AlertDescription>
               </Alert>
               
-              <form onSubmit={handleSubmit} className="px-2">
+              <form onSubmit={handleSubmit} className="px-1 sm:px-2">
                 <DemographicsSection 
                   surveyData={surveyData} 
                   updateSurveyData={updateSurveyData} 
                 />
                 
-                <div className="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
                   <Button 
                     type="button" 
                     variant="outline"
@@ -192,7 +195,7 @@ const Index = () => {
                   
                   <Button 
                     type="submit" 
-                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-6 py-2 w-full sm:w-auto"
+                    className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-4 py-2 w-full sm:w-auto"
                   >
                     <Send className="h-4 w-4" />
                     Soumettre le sondage
