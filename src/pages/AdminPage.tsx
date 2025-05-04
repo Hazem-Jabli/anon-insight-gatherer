@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ResponseStats from "@/components/admin/ResponseStats";
 import FilterControls from "@/components/admin/FilterControls";
 import Header from '@/components/layout/Header';
@@ -27,6 +28,7 @@ const AdminPage = () => {
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState("");
   const [showResponses, setShowResponses] = useState(false);
+  const [activeResponseTab, setActiveResponseTab] = useState("demographics");
   
   const [filters, setFilters] = useState({
     ageGroup: null as string | null,
@@ -117,7 +119,7 @@ const AdminPage = () => {
       filename = "survey_responses.json";
     } else if (format === 'csv') {
       // Simple CSV export
-      const headers = ["id", "submittedAt", "ageGroup", "educationLevel", "professionalSector", "usesSocialMedia", "platforms", "purpose"];
+      const headers = ["id", "submittedAt", "ageGroup", "educationLevel", "professionalSector", "usesSocialMedia"];
       const csvData = responses.map(r => [
         r.id,
         r.submittedAt,
@@ -125,8 +127,6 @@ const AdminPage = () => {
         r.demographics?.educationLevel || '',
         r.demographics?.professionalSector || '',
         r.socialMedia?.usesSocialMedia ? 'Oui' : 'Non',
-        r.socialMedia?.platforms ? r.socialMedia.platforms.join(';') : '',
-        r.socialMedia?.purpose ? r.socialMedia.purpose.join(';') : '',
       ]);
       
       dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent([headers.join(','), ...csvData.map(row => row.join(','))].join('\n'));
@@ -225,8 +225,16 @@ const AdminPage = () => {
                   {filteredResponses.map((response, index) => (
                     <li key={index} className="border p-4 rounded">
                       <h3 className="font-bold mb-2">Réponse #{index + 1}</h3>
-                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded overflow-x-auto">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      
+                      <Tabs defaultValue="demographics" className="w-full">
+                        <TabsList className="w-full mb-2 grid grid-cols-2 md:grid-cols-4">
+                          <TabsTrigger value="demographics">Démographiques</TabsTrigger>
+                          <TabsTrigger value="social">Réseaux Sociaux</TabsTrigger>
+                          <TabsTrigger value="influencer">Influenceurs</TabsTrigger>
+                          <TabsTrigger value="purchase">Achat & Opinion</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="demographics" className="space-y-2 bg-gray-50 dark:bg-gray-800 p-3 rounded overflow-x-auto">
                           <div>
                             <p className="font-semibold">Date:</p> 
                             <p>{new Date(response.submittedAt).toLocaleDateString()}</p>
@@ -243,6 +251,9 @@ const AdminPage = () => {
                             <p className="font-semibold">Secteur professionnel:</p>
                             <p>{response.demographics.professionalSector}</p>
                           </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="social" className="space-y-2 bg-gray-50 dark:bg-gray-800 p-3 rounded">
                           <div>
                             <p className="font-semibold">Utilise les réseaux sociaux:</p>
                             <p>{response.socialMedia?.usesSocialMedia ? 'Oui' : 'Non'}</p>
@@ -257,11 +268,11 @@ const AdminPage = () => {
                                 <p className="font-semibold">Utilisation:</p>
                                 <p>{response.socialMedia.purpose.join(', ') || 'Non spécifié'}</p>
                               </div>
-                              <div className="md:col-span-2">
+                              <div>
                                 <p className="font-semibold">Usage fréquent:</p>
                                 <p>{response.socialMedia.frequentUsage || 'Non spécifié'}</p>
                               </div>
-                              <div className="md:col-span-2">
+                              <div>
                                 <p className="font-semibold">Entreprises connues:</p>
                                 <p>{response.socialMedia.knownCompanies?.join(', ') || 'Aucune'}</p>
                               </div>
@@ -271,8 +282,170 @@ const AdminPage = () => {
                               </div>
                             </>
                           )}
-                        </div>
-                      </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="influencer" className="space-y-2 bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                          {response.socialMedia?.usesSocialMedia ? (
+                            <>
+                              <div>
+                                <p className="font-semibold">Suit des influenceurs:</p>
+                                <p>{response.influencerRelations?.followsInfluencers ? 'Oui' : 'Non'}</p>
+                              </div>
+                              
+                              {response.influencerRelations?.followsInfluencers && (
+                                <>
+                                  <div>
+                                    <p className="font-semibold">Raisons de suivre:</p>
+                                    <p>
+                                      {response.influencerRelations.followReasons?.map(reason => {
+                                        const labels: {[key: string]: string} = {
+                                          'fashion-beauty': 'Mode/Beauté', 
+                                          'travel-discovery': 'Voyages/Découvertes', 
+                                          'product-advice': 'Conseils produits', 
+                                          'humor-entertainment': 'Humour/Divertissement', 
+                                          'other': 'Autre'
+                                        };
+                                        return labels[reason] || reason;
+                                      }).join(', ') || 'Non spécifié'}
+                                    </p>
+                                  </div>
+                                  
+                                  {response.influencerRelations.otherFollowReason && (
+                                    <div>
+                                      <p className="font-semibold">Autre raison:</p>
+                                      <p>{response.influencerRelations.otherFollowReason}</p>
+                                    </div>
+                                  )}
+                                  
+                                  <div>
+                                    <p className="font-semibold">Niveau de confiance:</p>
+                                    <p>
+                                      {(() => {
+                                        const labels: {[key: string]: string} = {
+                                          'not-at-all': 'Pas du tout', 
+                                          'little': 'Peu', 
+                                          'medium': 'Moyennement', 
+                                          'lot': 'Beaucoup', 
+                                          'completely': 'Complètement'
+                                        };
+                                        return labels[response.influencerRelations.trustLevel] || response.influencerRelations.trustLevel;
+                                      })()}
+                                    </p>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="font-semibold">A liké/commenté une publication sponsorisée:</p>
+                                    <p>{response.engagement?.hasLikedSponsoredPost ? 'Oui' : 'Non'}</p>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="font-semibold">Réaction face à une publication sponsorisée:</p>
+                                    <p>
+                                      {(() => {
+                                        const labels: {[key: string]: string} = {
+                                          'ignore': 'Ignore', 
+                                          'read-no-reaction': 'Lit sans réagir', 
+                                          'interested-more-info': 'Cherche plus d\'infos', 
+                                          'click-link-product': 'Clique sur le lien/produit'
+                                        };
+                                        return labels[response.engagement?.sponsoredPostReaction || ''] || 'Non spécifié';
+                                      })()}
+                                    </p>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="font-semibold">A recherché un produit recommandé:</p>
+                                    <p>{response.engagement?.hasResearchedProduct ? 'Oui' : 'Non'}</p>
+                                  </div>
+                                </>
+                              )}
+                            </>
+                          ) : (
+                            <p>N'utilise pas les réseaux sociaux</p>
+                          )}
+                        </TabsContent>
+                        
+                        <TabsContent value="purchase" className="space-y-2 bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                          {response.socialMedia?.usesSocialMedia && response.influencerRelations?.followsInfluencers ? (
+                            <>
+                              <div>
+                                <p className="font-semibold">Achat suite à une recommandation:</p>
+                                <p>
+                                  {response.engagement?.hasPurchasedProduct === true ? 'Oui' : 
+                                   response.engagement?.hasPurchasedProduct === false ? 'Non' : 
+                                   'Ne sait plus'}
+                                </p>
+                              </div>
+                              
+                              <div>
+                                <p className="font-semibold">Influence sur l'intention d'achat:</p>
+                                <p>
+                                  {(() => {
+                                    const labels: {[key: string]: string} = {
+                                      'not-at-all': 'Pas du tout', 
+                                      'little': 'Un peu', 
+                                      'medium': 'Moyennement', 
+                                      'lot': 'Beaucoup', 
+                                      'enormously': 'Énormément'
+                                    };
+                                    return labels[response.purchaseIntention?.influenceLevel || ''] || 'Non spécifié';
+                                  })()}
+                                </p>
+                              </div>
+                              
+                              <div>
+                                <p className="font-semibold">Types d'influenceurs préférés:</p>
+                                <p>
+                                  {(() => {
+                                    const labels: {[key: string]: string} = {
+                                      'micro': 'Micro-influenceurs', 
+                                      'macro': 'Macro-influenceurs', 
+                                      'doesnt-matter': 'Peu importe'
+                                    };
+                                    return labels[response.purchaseIntention?.preferredInfluencerType || ''] || 'Non spécifié';
+                                  })()}
+                                </p>
+                              </div>
+                              
+                              <div>
+                                <p className="font-semibold">Fidèle à un ou plusieurs influenceurs:</p>
+                                <p>{response.purchaseIntention?.isLoyalToInfluencers ? 'Oui' : 'Non'}</p>
+                              </div>
+                              
+                              {response.purchaseIntention?.isLoyalToInfluencers && response.purchaseIntention.loyaltyReason && (
+                                <div>
+                                  <p className="font-semibold">Raison de la fidélité:</p>
+                                  <p>{response.purchaseIntention.loyaltyReason}</p>
+                                </div>
+                              )}
+                              
+                              <div>
+                                <p className="font-semibold">Efficacité du marketing d'influence:</p>
+                                <p>
+                                  {(() => {
+                                    const labels: {[key: string]: string} = {
+                                      'not-at-all': 'Pas du tout', 
+                                      'not-very': 'Peu efficace', 
+                                      'moderately': 'Moyennement efficace', 
+                                      'very': 'Très efficace'
+                                    };
+                                    return labels[response.globalAppreciation?.marketingEfficiency || ''] || 'Non spécifié';
+                                  })()}
+                                </p>
+                              </div>
+                              
+                              {response.globalAppreciation?.additionalRemarks && (
+                                <div>
+                                  <p className="font-semibold">Remarques additionnelles:</p>
+                                  <p>{response.globalAppreciation.additionalRemarks}</p>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <p>N'utilise pas les réseaux sociaux ou ne suit pas d'influenceurs</p>
+                          )}
+                        </TabsContent>
+                      </Tabs>
                     </li>
                   ))}
                 </ul>

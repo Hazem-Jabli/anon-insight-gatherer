@@ -12,6 +12,18 @@ export type SocialMediaPlatform = 'facebook' | 'instagram' | 'twitter' | 'linked
 export type SocialMediaPurpose = 'personal' | 'research' | 'professional' | 'other';
 export type InfluencerOpinion = 'yes' | 'probably' | 'certainly-yes' | 'no';
 
+// Influencer Relations
+export type InfluencerFollowReason = 'fashion-beauty' | 'travel-discovery' | 'product-advice' | 'humor-entertainment' | 'other';
+export type TrustLevel = 'not-at-all' | 'little' | 'medium' | 'lot' | 'completely';
+
+// Engagement
+export type SponsoredPostReaction = 'ignore' | 'read-no-reaction' | 'interested-more-info' | 'click-link-product';
+
+// Purchase Intention
+export type InfluenceLevel = 'not-at-all' | 'little' | 'medium' | 'lot' | 'enormously';
+export type InfluencerType = 'micro' | 'macro' | 'doesnt-matter';
+export type MarketingEfficiency = 'not-at-all' | 'not-very' | 'moderately' | 'very';
+
 export interface SurveyResponse {
   // Unique identifier for the response
   id: string;
@@ -34,6 +46,36 @@ export interface SurveyResponse {
     frequentUsage: string;
     knownCompanies: string[];
     influencerOpinion: InfluencerOpinion;
+  };
+
+  // Influencer Relations
+  influencerRelations: {
+    followsInfluencers: boolean;
+    followReasons: InfluencerFollowReason[];
+    otherFollowReason?: string;
+    trustLevel: TrustLevel;
+  };
+
+  // Engagement and Behavior
+  engagement: {
+    hasLikedSponsoredPost: boolean;
+    sponsoredPostReaction: SponsoredPostReaction;
+    hasResearchedProduct: boolean;
+    hasPurchasedProduct: boolean | null; // null for "I don't know"
+  };
+
+  // Purchase Intention
+  purchaseIntention: {
+    influenceLevel: InfluenceLevel;
+    preferredInfluencerType: InfluencerType;
+    isLoyalToInfluencers: boolean;
+    loyaltyReason?: string;
+  };
+  
+  // Global Appreciation
+  globalAppreciation: {
+    marketingEfficiency: MarketingEfficiency;
+    additionalRemarks?: string;
   };
   
   // Additional feedback
@@ -62,6 +104,27 @@ export const emptySurveyResponse: SurveyResponse = {
     frequentUsage: '',
     knownCompanies: [],
     influencerOpinion: 'probably'
+  },
+  influencerRelations: {
+    followsInfluencers: false,
+    followReasons: [],
+    trustLevel: 'medium'
+  },
+  engagement: {
+    hasLikedSponsoredPost: false,
+    sponsoredPostReaction: 'ignore',
+    hasResearchedProduct: false,
+    hasPurchasedProduct: false
+  },
+  purchaseIntention: {
+    influenceLevel: 'medium',
+    preferredInfluencerType: 'doesnt-matter',
+    isLoyalToInfluencers: false,
+    loyaltyReason: ''
+  },
+  globalAppreciation: {
+    marketingEfficiency: 'moderately',
+    additionalRemarks: ''
   },
   additionalFeedback: '',
 };

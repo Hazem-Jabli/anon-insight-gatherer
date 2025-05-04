@@ -6,6 +6,10 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import DemographicsSection from '@/components/survey/DemographicsSection';
 import SocialMediaSection from '@/components/survey/SocialMediaSection';
+import InfluencerRelationsSection from '@/components/survey/InfluencerRelationsSection';
+import EngagementSection from '@/components/survey/EngagementSection';
+import PurchaseIntentionSection from '@/components/survey/PurchaseIntentionSection';
+import GlobalAppreciationSection from '@/components/survey/GlobalAppreciationSection';
 import ThankYouMessage from '@/components/survey/ThankYouMessage';
 import ThemeToggle from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -129,8 +133,8 @@ const Index = () => {
     }
   };
 
-  // Determine if we should show the full form or just the thank you message
-  const showFullForm = !surveyData.socialMedia.usesSocialMedia === false;
+  // Determine if we should show the full form
+  const shouldShowThankYouMessage = !surveyData.socialMedia.usesSocialMedia || !surveyData.influencerRelations?.followsInfluencers;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -191,7 +195,27 @@ const Index = () => {
                   updateSurveyData={updateSurveyData}
                 />
                 
-                {surveyData.socialMedia.usesSocialMedia === false && (
+                <InfluencerRelationsSection
+                  surveyData={surveyData}
+                  updateSurveyData={updateSurveyData}
+                />
+                
+                <EngagementSection
+                  surveyData={surveyData}
+                  updateSurveyData={updateSurveyData}
+                />
+                
+                <PurchaseIntentionSection
+                  surveyData={surveyData}
+                  updateSurveyData={updateSurveyData}
+                />
+                
+                <GlobalAppreciationSection
+                  surveyData={surveyData}
+                  updateSurveyData={updateSurveyData}
+                />
+                
+                {shouldShowThankYouMessage && (
                   <ThankYouMessage />
                 )}
                 

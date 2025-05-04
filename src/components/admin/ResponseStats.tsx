@@ -198,6 +198,182 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
     .slice(0, 10)
     .map(([name, count]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value: count }));
 
+  // New Stats: Influencer Relations
+  const followsInfluencersData = [
+    { name: "Suit des influenceurs", value: responses.filter(r => r.influencerRelations?.followsInfluencers).length },
+    { name: "Ne suit pas", value: responses.filter(r => r.socialMedia?.usesSocialMedia && r.influencerRelations?.followsInfluencers === false).length }
+  ];
+
+  // Reasons for following influencers
+  const followReasonCounts: { [key: string]: number } = {};
+  responses.forEach(response => {
+    if (response.influencerRelations?.followReasons) {
+      response.influencerRelations.followReasons.forEach(reason => {
+        followReasonCounts[reason] = (followReasonCounts[reason] || 0) + 1;
+      });
+    }
+  });
+
+  const followReasonLabels: { [key: string]: string } = {
+    'fashion-beauty': 'Mode/Beauté',
+    'travel-discovery': 'Voyages/Découvertes',
+    'product-advice': 'Conseils produits',
+    'humor-entertainment': 'Humour/Divertissement',
+    'other': 'Autre'
+  };
+
+  const followReasonData = Object.entries(followReasonCounts).map(([key, value]) => ({
+    name: followReasonLabels[key] || key,
+    value,
+  }));
+
+  // Trust levels
+  const trustLevelCounts = responses.reduce((counts, response) => {
+    const level = response.influencerRelations?.trustLevel;
+    if (level) {
+      counts[level] = (counts[level] || 0) + 1;
+    }
+    return counts;
+  }, {} as { [key: string]: number });
+
+  const trustLevelLabels: { [key: string]: string } = {
+    'not-at-all': 'Pas du tout',
+    'little': 'Peu',
+    'medium': 'Moyennement',
+    'lot': 'Beaucoup',
+    'completely': 'Complètement'
+  };
+
+  const trustLevelData = Object.entries(trustLevelCounts).map(([key, value]) => ({
+    name: trustLevelLabels[key] || key,
+    value,
+  }));
+
+  // Engagement Stats
+  const likedPostData = [
+    { 
+      name: "Ont liké/commenté", 
+      value: responses.filter(r => r.engagement?.hasLikedSponsoredPost).length 
+    },
+    { 
+      name: "N'ont pas liké", 
+      value: responses.filter(r => r.influencerRelations?.followsInfluencers && r.engagement?.hasLikedSponsoredPost === false).length 
+    }
+  ];
+
+  // Reactions to sponsored posts
+  const reactionCounts = responses.reduce((counts, response) => {
+    const reaction = response.engagement?.sponsoredPostReaction;
+    if (reaction) {
+      counts[reaction] = (counts[reaction] || 0) + 1;
+    }
+    return counts;
+  }, {} as { [key: string]: number });
+
+  const reactionLabels: { [key: string]: string } = {
+    'ignore': 'Ignore',
+    'read-no-reaction': 'Lit sans réagir',
+    'interested-more-info': 'Cherche plus d\'infos',
+    'click-link-product': 'Clique sur le lien/produit'
+  };
+
+  const reactionData = Object.entries(reactionCounts).map(([key, value]) => ({
+    name: reactionLabels[key] || key,
+    value,
+  }));
+
+  // Research and purchase behavior
+  const researchedProductData = [
+    { 
+      name: "Ont recherché", 
+      value: responses.filter(r => r.engagement?.hasResearchedProduct).length 
+    },
+    { 
+      name: "N'ont pas recherché", 
+      value: responses.filter(r => r.influencerRelations?.followsInfluencers && r.engagement?.hasResearchedProduct === false).length 
+    }
+  ];
+
+  const purchasedProductData = [
+    { name: "Oui", value: responses.filter(r => r.engagement?.hasPurchasedProduct === true).length },
+    { name: "Non", value: responses.filter(r => r.influencerRelations?.followsInfluencers && r.engagement?.hasPurchasedProduct === false).length },
+    { name: "Ne sait plus", value: responses.filter(r => r.engagement?.hasPurchasedProduct === null).length }
+  ];
+
+  // Purchase Intention Stats
+  // Influence level
+  const influenceLevelCounts = responses.reduce((counts, response) => {
+    const level = response.purchaseIntention?.influenceLevel;
+    if (level) {
+      counts[level] = (counts[level] || 0) + 1;
+    }
+    return counts;
+  }, {} as { [key: string]: number });
+
+  const influenceLevelLabels: { [key: string]: string } = {
+    'not-at-all': 'Pas du tout',
+    'little': 'Un peu',
+    'medium': 'Moyennement',
+    'lot': 'Beaucoup',
+    'enormously': 'Énormément'
+  };
+
+  const influenceLevelData = Object.entries(influenceLevelCounts).map(([key, value]) => ({
+    name: influenceLevelLabels[key] || key,
+    value,
+  }));
+
+  // Preferred influencer type
+  const influencerTypeCounts = responses.reduce((counts, response) => {
+    const type = response.purchaseIntention?.preferredInfluencerType;
+    if (type) {
+      counts[type] = (counts[type] || 0) + 1;
+    }
+    return counts;
+  }, {} as { [key: string]: number });
+
+  const influencerTypeLabels: { [key: string]: string } = {
+    'micro': 'Micro-influenceurs',
+    'macro': 'Macro-influenceurs',
+    'doesnt-matter': 'Peu importe'
+  };
+
+  const influencerTypeData = Object.entries(influencerTypeCounts).map(([key, value]) => ({
+    name: influencerTypeLabels[key] || key,
+    value,
+  }));
+
+  // Loyalty to influencers
+  const loyaltyData = [
+    { name: "Fidèles", value: responses.filter(r => r.purchaseIntention?.isLoyalToInfluencers).length },
+    { 
+      name: "Non fidèles", 
+      value: responses.filter(r => r.influencerRelations?.followsInfluencers && r.purchaseIntention?.isLoyalToInfluencers === false).length 
+    }
+  ];
+
+  // Global Appreciation Stats
+  // Marketing efficiency
+  const marketingEfficiencyCounts = responses.reduce((counts, response) => {
+    const efficiency = response.globalAppreciation?.marketingEfficiency;
+    if (efficiency) {
+      counts[efficiency] = (counts[efficiency] || 0) + 1;
+    }
+    return counts;
+  }, {} as { [key: string]: number });
+
+  const marketingEfficiencyLabels: { [key: string]: string } = {
+    'not-at-all': 'Pas du tout',
+    'not-very': 'Peu efficace',
+    'moderately': 'Moyennement efficace',
+    'very': 'Très efficace'
+  };
+
+  const marketingEfficiencyData = Object.entries(marketingEfficiencyCounts).map(([key, value]) => ({
+    name: marketingEfficiencyLabels[key] || key,
+    value,
+  }));
+
   const chartHeight = isMobile ? 250 : 300;
   const chartWidth = '100%';
 
@@ -206,12 +382,21 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
       <h2 className="text-xl font-semibold mb-4">Statistiques des Réponses</h2>
 
       <Tabs defaultValue="demographics" onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4 w-full grid grid-cols-2 md:flex">
+        <TabsList className="mb-4 w-full grid grid-cols-2 md:grid-cols-5">
           <TabsTrigger value="demographics" className="flex-1">
             Démographiques
           </TabsTrigger>
           <TabsTrigger value="social" className="flex-1">
             Réseaux Sociaux
+          </TabsTrigger>
+          <TabsTrigger value="relations" className="flex-1">
+            Relations Influenceurs
+          </TabsTrigger>
+          <TabsTrigger value="engagement" className="flex-1">
+            Engagement
+          </TabsTrigger>
+          <TabsTrigger value="purchase" className="flex-1">
+            Achat & Opinion
           </TabsTrigger>
         </TabsList>
         
@@ -435,6 +620,298 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               ) : (
                 <p className="text-center text-gray-500 py-8">Aucune entreprise mentionnée</p>
               )}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="relations" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Follows Influencers */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Suit des influenceurs</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <PieChart width={chartWidth} height={chartHeight}>
+                    <Pie
+                      data={followsInfluencersData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={isMobile ? 80 : 100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {followsInfluencersData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+              </div>
+            </div>
+
+            {/* Follow Reasons */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Raisons de suivre des influenceurs</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <BarChart 
+                    width={chartWidth} 
+                    height={chartHeight} 
+                    data={followReasonData}
+                    layout={isMobile ? "vertical" : "horizontal"}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    {isMobile ? (
+                      <>
+                        <YAxis dataKey="name" type="category" width={120} tick={{fontSize: 10}} />
+                        <XAxis type="number" />
+                      </>
+                    ) : (
+                      <>
+                        <XAxis dataKey="name" tick={{fontSize: 12}} />
+                        <YAxis />
+                      </>
+                    )}
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="#22c55e" />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </div>
+
+            {/* Trust Levels */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4 lg:col-span-2">
+              <h3 className="text-lg font-semibold mb-4">Niveau de confiance envers les influenceurs</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <BarChart 
+                    width={chartWidth} 
+                    height={chartHeight} 
+                    data={trustLevelData}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="#a855f7" />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="engagement" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Liked/Commented Posts */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Ont liké/commenté des publications</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <PieChart width={chartWidth} height={chartHeight}>
+                    <Pie
+                      data={likedPostData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={isMobile ? 80 : 100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {likedPostData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+              </div>
+            </div>
+
+            {/* Reactions to Sponsored Posts */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Réactions aux publications sponsorisées</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <BarChart 
+                    width={chartWidth} 
+                    height={chartHeight} 
+                    data={reactionData}
+                    layout={isMobile ? "vertical" : "horizontal"}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    {isMobile ? (
+                      <>
+                        <YAxis dataKey="name" type="category" width={120} tick={{fontSize: 10}} />
+                        <XAxis type="number" />
+                      </>
+                    ) : (
+                      <>
+                        <XAxis dataKey="name" tick={{fontSize: 12}} />
+                        <YAxis />
+                      </>
+                    )}
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="#eab308" />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </div>
+            
+            {/* Researched Products */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Recherche de produits recommandés</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <PieChart width={chartWidth} height={chartHeight}>
+                    <Pie
+                      data={researchedProductData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={isMobile ? 80 : 100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {researchedProductData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+              </div>
+            </div>
+            
+            {/* Purchased Products */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Achats suite à des recommandations</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <BarChart 
+                    width={chartWidth} 
+                    height={chartHeight} 
+                    data={purchasedProductData}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="#ef4444" />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="purchase" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Influence on Purchase Intention */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Influence sur l'intention d'achat</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <BarChart 
+                    width={chartWidth} 
+                    height={chartHeight} 
+                    data={influenceLevelData}
+                    layout={isMobile ? "vertical" : "horizontal"}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    {isMobile ? (
+                      <>
+                        <YAxis dataKey="name" type="category" width={120} tick={{fontSize: 10}} />
+                        <XAxis type="number" />
+                      </>
+                    ) : (
+                      <>
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                      </>
+                    )}
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="#3b82f6" />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </div>
+
+            {/* Preferred Influencer Types */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Types d'influenceurs préférés</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <PieChart width={chartWidth} height={chartHeight}>
+                    <Pie
+                      data={influencerTypeData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={isMobile ? 80 : 100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {influencerTypeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+              </div>
+            </div>
+            
+            {/* Loyalty to Influencers */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Fidélité aux influenceurs</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <PieChart width={chartWidth} height={chartHeight}>
+                    <Pie
+                      data={loyaltyData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={isMobile ? 80 : 100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {loyaltyData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+              </div>
+            </div>
+            
+            {/* Marketing Efficiency */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-md p-4">
+              <h3 className="text-lg font-semibold mb-4">Efficacité du marketing d'influence</h3>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={{}} className="h-full">
+                  <BarChart 
+                    width={chartWidth} 
+                    height={chartHeight} 
+                    data={marketingEfficiencyData}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="#8b5cf6" />
+                  </BarChart>
+                </ChartContainer>
+              </div>
             </div>
           </div>
         </TabsContent>
