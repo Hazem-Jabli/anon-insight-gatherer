@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -168,10 +167,10 @@ const Index = () => {
                 </div>
                 <div className="text-center mt-8 sm:mt-12 px-2 sm:px-4">
                   <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-center text-survey-dark dark:text-white mb-2 break-words">
-                    Sondage Anonyme sur le Crédit d'Investissement
+                    L'impact du marketing d'influence sur le comportement des consommateurs sur réseaux sociaux
                   </h1>
                   <p className="text-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">
-                    Aidez-nous à comprendre les perspectives sur le crédit d'investissement sans partager d'informations personnelles
+                    Aidez-nous à comprendre les perspectives sur le marketing d'influence sans partager d'informations personnelles
                   </p>
                 </div>
               </div>

@@ -27,7 +27,7 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
     <Card className="mb-4 sm:mb-6">
       <CardHeader className={isMobile ? "px-3 py-3" : undefined}>
         <CardTitle className="text-lg sm:text-xl font-semibold text-survey-dark dark:text-gray-100">
-          Informations Démographiques
+          Informations générales du répondant
         </CardTitle>
       </CardHeader>
       <CardContent className={`space-y-4 sm:space-y-6 ${isMobile ? "px-3 py-3" : undefined}`}>
