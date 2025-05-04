@@ -16,11 +16,7 @@ const Header: FC<HeaderProps> = ({ isAdmin = false }) => {
       <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
         <div className="flex items-center mb-3 sm:mb-0">
           <h1 className={`text-xl font-semibold text-survey-dark dark:text-white text-center sm:text-left ${isMobile ? 'w-full mx-auto' : ''}`}>
-            {isAdmin ? "Tableau de Bord Administrateur" : (
-              <span className="inline-block whitespace-normal sm:whitespace-nowrap">
-                L'impact du marketing d'influence sur le comportement des consommateurs sur réseaux sociaux
-              </span>
-            )}
+            {isAdmin ? "Tableau de Bord Administrateur" : "Sondage"}
           </h1>
         </div>
         <nav>
