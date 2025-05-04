@@ -375,7 +375,6 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
   }));
 
   const chartHeight = isMobile ? 250 : 300;
-  const chartWidth = '100%';
 
   return (
     <div className="space-y-8">
@@ -407,7 +406,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Groupes d'âge</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={ageGroupData}
                       cx="50%"
@@ -434,7 +433,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={educationData}
                     layout={isMobile ? "vertical" : "horizontal"}
@@ -464,7 +463,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={sectorData}
                     layout={isMobile ? "vertical" : "horizontal"}
@@ -498,7 +497,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Utilisation des Réseaux Sociaux</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={socialMediaUsage}
                       cx="50%"
@@ -525,7 +524,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={platformData}
                     layout={isMobile ? "vertical" : "horizontal"}
@@ -554,7 +553,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Objectif d'Utilisation</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={purposeData}
                       cx="50%"
@@ -581,7 +580,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={influencerData}
                   >
@@ -631,7 +630,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Suit des influenceurs</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={followsInfluencersData}
                       cx="50%"
@@ -658,7 +657,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={followReasonData}
                     layout={isMobile ? "vertical" : "horizontal"}
@@ -688,7 +687,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={trustLevelData}
                   >
@@ -711,7 +710,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Ont liké/commenté des publications</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={likedPostData}
                       cx="50%"
@@ -738,7 +737,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={reactionData}
                     layout={isMobile ? "vertical" : "horizontal"}
@@ -767,7 +766,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Recherche de produits recommandés</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={researchedProductData}
                       cx="50%"
@@ -794,7 +793,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={purchasedProductData}
                   >
@@ -818,7 +817,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={influenceLevelData}
                     layout={isMobile ? "vertical" : "horizontal"}
@@ -847,7 +846,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Types d'influenceurs préférés</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={influencerTypeData}
                       cx="50%"
@@ -873,7 +872,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <h3 className="text-lg font-semibold mb-4">Fidélité aux influenceurs</h3>
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
-                  <PieChart width={chartWidth} height={chartHeight}>
+                  <PieChart width={500} height={chartHeight}>
                     <Pie
                       data={loyaltyData}
                       cx="50%"
@@ -900,7 +899,7 @@ const ResponseStats: React.FC<ResponseStatsProps> = ({ responses }) => {
               <div className="h-[300px] w-full">
                 <ChartContainer config={{}} className="h-full">
                   <BarChart 
-                    width={chartWidth} 
+                    width={500} 
                     height={chartHeight} 
                     data={marketingEfficiencyData}
                   >
