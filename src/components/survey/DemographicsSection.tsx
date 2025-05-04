@@ -57,16 +57,17 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
         {/* Menu déroulant Niveau d'éducation */}
         <div className="space-y-2 sm:space-y-3">
           <Label htmlFor="education-level" className="block text-sm font-medium">
-            Niveau d'éducation
+            <span className="font-bold text-survey-primary">Niveau d'éducation</span>
+            <span className="ml-2 text-xs text-gray-500">(Veuillez sélectionner votre plus haut niveau d'étude)</span>
           </Label>
           <Select
             value={surveyData.demographics.educationLevel}
             onValueChange={(value) => updateSurveyData('demographics.educationLevel', value)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full border-survey-primary">
               <SelectValue placeholder="Sélectionner un niveau d'éducation" />
             </SelectTrigger>
-            <SelectContent id="education-level">
+            <SelectContent id="education-level" className="bg-white dark:bg-gray-800">
               <SelectItem value="high-school">Lycée</SelectItem>
               <SelectItem value="some-college">Formation supérieure</SelectItem>
               <SelectItem value="bachelors">Licence</SelectItem>

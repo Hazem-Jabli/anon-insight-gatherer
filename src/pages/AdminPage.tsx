@@ -9,20 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from '@/components/ui/scroll-area';
 import ResponseStats from "@/components/admin/ResponseStats";
 import FilterControls from "@/components/admin/FilterControls";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { generateDummyData } from "@/lib/dummyData";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ADMIN_PIN = "223344";
 
 const AdminPage = () => {
+  const isMobile = useIsMobile();
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
   const [filteredResponses, setFilteredResponses] = useState<SurveyResponse[]>([]);
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState("");
+  const [showResponses, setShowResponses] = useState(false);
   
   const [filters, setFilters] = useState({
     ageGroup: null as string | null,
@@ -112,14 +116,17 @@ const AdminPage = () => {
       dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(responses, null, 2));
       filename = "survey_responses.json";
     } else if (format === 'csv') {
-      // Simple CSV export (would need more robust handling for complex nested data)
-      const headers = ["id", "submittedAt", "ageGroup", "educationLevel", "professionalSector"];
+      // Simple CSV export
+      const headers = ["id", "submittedAt", "ageGroup", "educationLevel", "professionalSector", "usesSocialMedia", "platforms", "purpose"];
       const csvData = responses.map(r => [
         r.id,
         r.submittedAt,
         r.demographics?.ageGroup || '',
         r.demographics?.educationLevel || '',
         r.demographics?.professionalSector || '',
+        r.socialMedia?.usesSocialMedia ? 'Oui' : 'Non',
+        r.socialMedia?.platforms ? r.socialMedia.platforms.join(';') : '',
+        r.socialMedia?.purpose ? r.socialMedia.purpose.join(';') : '',
       ]);
       
       dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent([headers.join(','), ...csvData.map(row => row.join(','))].join('\n'));
@@ -173,41 +180,106 @@ const AdminPage = () => {
       <Header isAdmin={true} />
       
       <main className="flex-grow container mx-auto p-4 sm:p-6">
-        <h1 className="text-3xl font-bold mb-6">Page d'administration du sondage</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Page d'administration du sondage</h1>
         
-        <div className="mb-4">
-          <Label>Nombre total de réponses: {responses.length}</Label>
-          <Label className="ml-4">Réponses filtrées: {filteredResponses.length}</Label>
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between">
+          <div>
+            <Label className="block mb-2 sm:mb-0 sm:inline-block sm:mr-4">Nombre total de réponses: {responses.length}</Label>
+            <Label>Réponses filtrées: {filteredResponses.length}</Label>
+          </div>
+          
+          <Button 
+            variant="outline"
+            className="mt-2 sm:mt-0" 
+            onClick={() => setShowResponses(!showResponses)}
+          >
+            {showResponses ? "Masquer les réponses" : "Afficher les réponses"}
+          </Button>
         </div>
 
-        <FilterControls 
-          onFilterChange={handleFilterChange}
-          onResetFilters={handleResetFilters}
-          onResetData={handleClearResponses}
-          onExportData={handleExportData}
-          filters={filters}
-          responseCount={responses.length}
-        />
+        <div className="mb-6">
+          <FilterControls 
+            onFilterChange={handleFilterChange}
+            onResetFilters={handleResetFilters}
+            onResetData={handleClearResponses}
+            onExportData={handleExportData}
+            filters={filters}
+            responseCount={responses.length}
+          />
+        </div>
 
         {filteredResponses.length > 0 && (
-          <ResponseStats responses={filteredResponses} />
+          <div className={isMobile ? "mb-6" : ""}>
+            <ResponseStats responses={filteredResponses} />
+          </div>
         )}
 
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-2">Réponses au sondage</h2>
-          {filteredResponses.length === 0 ? (
-            <p>Aucune réponse au sondage n'a été trouvée.</p>
-          ) : (
-            <ul>
-              {filteredResponses.map((response, index) => (
-                <li key={index} className="border p-4 mb-4 rounded">
-                  <h3 className="font-bold">Réponse #{index + 1}</h3>
-                  <pre className="overflow-x-auto whitespace-pre-wrap">{JSON.stringify(response, null, 2)}</pre>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {showResponses && (
+          <div className="mt-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Réponses au sondage</h2>
+            {filteredResponses.length === 0 ? (
+              <p>Aucune réponse au sondage n'a été trouvée.</p>
+            ) : (
+              <ScrollArea className={isMobile ? "h-[400px]" : "h-auto"}>
+                <ul className="space-y-4">
+                  {filteredResponses.map((response, index) => (
+                    <li key={index} className="border p-4 rounded">
+                      <h3 className="font-bold mb-2">Réponse #{index + 1}</h3>
+                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded overflow-x-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="font-semibold">Date:</p> 
+                            <p>{new Date(response.submittedAt).toLocaleDateString()}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold">Groupe d'âge:</p>
+                            <p>{response.demographics.ageGroup}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold">Niveau d'éducation:</p>
+                            <p>{response.demographics.educationLevel}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold">Secteur professionnel:</p>
+                            <p>{response.demographics.professionalSector}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold">Utilise les réseaux sociaux:</p>
+                            <p>{response.socialMedia?.usesSocialMedia ? 'Oui' : 'Non'}</p>
+                          </div>
+                          {response.socialMedia?.usesSocialMedia && (
+                            <>
+                              <div>
+                                <p className="font-semibold">Plateformes:</p>
+                                <p>{response.socialMedia.platforms.join(', ') || 'Non spécifié'}</p>
+                              </div>
+                              <div>
+                                <p className="font-semibold">Utilisation:</p>
+                                <p>{response.socialMedia.purpose.join(', ') || 'Non spécifié'}</p>
+                              </div>
+                              <div className="md:col-span-2">
+                                <p className="font-semibold">Usage fréquent:</p>
+                                <p>{response.socialMedia.frequentUsage || 'Non spécifié'}</p>
+                              </div>
+                              <div className="md:col-span-2">
+                                <p className="font-semibold">Entreprises connues:</p>
+                                <p>{response.socialMedia.knownCompanies?.join(', ') || 'Aucune'}</p>
+                              </div>
+                              <div>
+                                <p className="font-semibold">Opinion sur les influenceurs:</p>
+                                <p>{response.socialMedia.influencerOpinion}</p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </ScrollArea>
+            )}
+          </div>
+        )}
       </main>
       
       <Footer />

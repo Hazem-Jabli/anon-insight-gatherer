@@ -7,6 +7,11 @@ export type EducationLevel = 'high-school' | 'some-college' | 'bachelors' | 'mas
 export type ProfessionalSector = 'technology' | 'healthcare' | 'finance' | 'education' | 'manufacturing' | 
                                'retail' | 'government' | 'non-profit' | 'other';
 
+// Social Media
+export type SocialMediaPlatform = 'facebook' | 'instagram' | 'twitter' | 'linkedin' | 'tiktok' | 'youtube' | 'other';
+export type SocialMediaPurpose = 'personal' | 'research' | 'professional' | 'other';
+export type InfluencerOpinion = 'yes' | 'probably' | 'certainly-yes' | 'no';
+
 export interface SurveyResponse {
   // Unique identifier for the response
   id: string;
@@ -19,6 +24,16 @@ export interface SurveyResponse {
     ageGroup: AgeGroup;
     educationLevel: EducationLevel;
     professionalSector: ProfessionalSector;
+  };
+  
+  // Social Media
+  socialMedia: {
+    usesSocialMedia: boolean;
+    platforms: SocialMediaPlatform[];
+    purpose: SocialMediaPurpose[];
+    frequentUsage: string;
+    knownCompanies: string[];
+    influencerOpinion: InfluencerOpinion;
   };
   
   // Additional feedback
@@ -39,6 +54,14 @@ export const emptySurveyResponse: SurveyResponse = {
     ageGroup: '25-34',
     educationLevel: 'bachelors',
     professionalSector: 'other',
+  },
+  socialMedia: {
+    usesSocialMedia: false,
+    platforms: [],
+    purpose: [],
+    frequentUsage: '',
+    knownCompanies: [],
+    influencerOpinion: 'probably'
   },
   additionalFeedback: '',
 };

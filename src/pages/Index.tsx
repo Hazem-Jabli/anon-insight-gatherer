@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import DemographicsSection from '@/components/survey/DemographicsSection';
+import SocialMediaSection from '@/components/survey/SocialMediaSection';
+import ThankYouMessage from '@/components/survey/ThankYouMessage';
 import ThemeToggle from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -127,6 +129,9 @@ const Index = () => {
     }
   };
 
+  // Determine if we should show the full form or just the thank you message
+  const showFullForm = !surveyData.socialMedia.usesSocialMedia === false;
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -180,6 +185,15 @@ const Index = () => {
                   surveyData={surveyData} 
                   updateSurveyData={updateSurveyData} 
                 />
+                
+                <SocialMediaSection
+                  surveyData={surveyData}
+                  updateSurveyData={updateSurveyData}
+                />
+                
+                {surveyData.socialMedia.usesSocialMedia === false && (
+                  <ThankYouMessage />
+                )}
                 
                 <div className="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
                   <Button 

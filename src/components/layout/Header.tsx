@@ -15,8 +15,12 @@ const Header: FC<HeaderProps> = ({ isAdmin = false }) => {
     <header className="w-full py-4 px-6 bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
       <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
         <div className="flex items-center mb-3 sm:mb-0">
-          <h1 className={`text-xl font-semibold text-survey-dark dark:text-white text-center sm:text-left ${isMobile ? 'w-full whitespace-nowrap' : ''}`}>
-            {isAdmin ? "Tableau de Bord Administrateur" : "Sondage sur le Crédit d'Investissement"}
+          <h1 className={`text-xl font-semibold text-survey-dark dark:text-white text-center sm:text-left ${isMobile ? 'w-full mx-auto' : ''}`}>
+            {isAdmin ? "Tableau de Bord Administrateur" : (
+              <span className="inline-block whitespace-normal sm:whitespace-nowrap">
+                Sondage sur le Crédit d'Investissement
+              </span>
+            )}
           </h1>
         </div>
         <nav>
