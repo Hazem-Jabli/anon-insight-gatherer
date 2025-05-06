@@ -1,24 +1,38 @@
 
 import { SurveyDataStore, SurveyResponse } from '@/types/survey';
+import { saveSurveyToDatabase, getAllSurveyResponsesFromDB } from './surveyService';
 
 // LocalStorage keys
 const SURVEY_DATA_KEY = 'anonymous-survey-data';
 const SURVEY_IN_PROGRESS_KEY = 'survey-in-progress';
 
 // Initialize the survey data store
-export const initializeSurveyDataStore = (): SurveyDataStore => {
+export const initializeSurveyDataStore = async (): Promise<SurveyDataStore> => {
   // Only run on client side
   if (typeof window === 'undefined') {
     return { responses: [], lastUpdated: new Date().toISOString() };
   }
   
   try {
-    const storedData = localStorage.getItem(SURVEY_DATA_KEY);
-    if (storedData) {
-      return JSON.parse(storedData);
-    }
+    // Get responses from Supabase
+    const responses = await getAllSurveyResponsesFromDB();
+    
+    return {
+      responses,
+      lastUpdated: new Date().toISOString()
+    };
   } catch (error) {
-    console.error('Error reading from localStorage:', error);
+    console.error('Error initializing survey data store:', error);
+    
+    // Fallback to localStorage if there's an error
+    try {
+      const storedData = localStorage.getItem(SURVEY_DATA_KEY);
+      if (storedData) {
+        return JSON.parse(storedData);
+      }
+    } catch (localError) {
+      console.error('Error reading from localStorage:', localError);
+    }
   }
   
   // Return empty data store if nothing exists or error occurred
@@ -27,36 +41,44 @@ export const initializeSurveyDataStore = (): SurveyDataStore => {
     lastUpdated: new Date().toISOString() 
   };
   
-  // Save the empty store
-  localStorage.setItem(SURVEY_DATA_KEY, JSON.stringify(emptyStore));
   return emptyStore;
 };
 
 // Save a completed survey response
-export const saveSurveyResponse = (response: SurveyResponse): void => {
+export const saveSurveyResponse = async (response: SurveyResponse): Promise<void> => {
   try {
-    // Get current data
-    const currentData = initializeSurveyDataStore();
-    
-    // Add new response
-    currentData.responses.push(response);
-    currentData.lastUpdated = new Date().toISOString();
-    
-    // Save updated data
-    localStorage.setItem(SURVEY_DATA_KEY, JSON.stringify(currentData));
+    // Save to Supabase
+    await saveSurveyToDatabase(response);
     
     // Clear in-progress data
     localStorage.removeItem(SURVEY_IN_PROGRESS_KEY);
     
-    console.log('Survey response saved successfully');
+    console.log('Survey response saved successfully to database');
   } catch (error) {
-    console.error('Error saving survey response:', error);
+    console.error('Error saving survey response to database:', error);
+    
+    // Fallback to localStorage
+    try {
+      // Get current data
+      const currentData = await initializeSurveyDataStore();
+      
+      // Add new response
+      currentData.responses.push(response);
+      currentData.lastUpdated = new Date().toISOString();
+      
+      // Save updated data
+      localStorage.setItem(SURVEY_DATA_KEY, JSON.stringify(currentData));
+      
+      console.log('Survey response saved to localStorage as fallback');
+    } catch (localError) {
+      console.error('Error saving to localStorage:', localError);
+    }
   }
 };
 
 // Get all survey responses
-export const getAllSurveyResponses = (): SurveyResponse[] => {
-  const store = initializeSurveyDataStore();
+export const getAllSurveyResponses = async (): Promise<SurveyResponse[]> => {
+  const store = await initializeSurveyDataStore();
   return store.responses;
 };
 
@@ -81,28 +103,34 @@ export const getSurveyInProgress = (): Partial<SurveyResponse> | null => {
 };
 
 // Clear all survey data
-export const clearAllSurveyData = (): void => {
+export const clearAllSurveyData = async (): Promise<void> => {
   try {
+    // This would require additional backend implementation to delete data from Supabase
+    // For now, just clear localStorage
     const emptyStore: SurveyDataStore = { 
       responses: [], 
       lastUpdated: new Date().toISOString() 
     };
     localStorage.setItem(SURVEY_DATA_KEY, JSON.stringify(emptyStore));
-    console.log('All survey data cleared');
+    console.log('Local survey data cleared');
   } catch (error) {
     console.error('Error clearing survey data:', error);
   }
 };
 
 // Export survey data as JSON
-export const exportSurveyDataAsJSON = (): string => {
-  const data = initializeSurveyDataStore();
+export const exportSurveyDataAsJSON = async (): Promise<string> => {
+  const responses = await getAllSurveyResponses();
+  const data = {
+    responses,
+    lastUpdated: new Date().toISOString()
+  };
   return JSON.stringify(data, null, 2);
 };
 
 // Export survey data as CSV
-export const exportSurveyDataAsCSV = (): string => {
-  const responses = getAllSurveyResponses();
+export const exportSurveyDataAsCSV = async (): Promise<string> => {
+  const responses = await getAllSurveyResponses();
   
   if (responses.length === 0) {
     return '';

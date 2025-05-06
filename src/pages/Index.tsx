@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ const Index = () => {
   });
   
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Load any in-progress survey data on mount
   useEffect(() => {
@@ -92,24 +94,32 @@ const Index = () => {
   };
   
   // Handle survey submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Add timestamp
-    const completeResponse: SurveyResponse = {
-      ...surveyData,
-      submittedAt: new Date().toISOString()
-    };
+    setIsSubmitting(true);
     
-    // Save to localStorage
-    saveSurveyResponse(completeResponse);
-    
-    // Update UI
-    setSubmitted(true);
-    
-    toast.success("Sondage soumis avec succès! Merci pour votre participation.");
-    
-    console.log("Survey submitted:", completeResponse);
+    try {
+      // Add timestamp
+      const completeResponse: SurveyResponse = {
+        ...surveyData,
+        submittedAt: new Date().toISOString()
+      };
+      
+      // Save to Supabase (with localStorage fallback)
+      await saveSurveyResponse(completeResponse);
+      
+      // Update UI
+      setSubmitted(true);
+      toast.success("Sondage soumis avec succès! Merci pour votre participation.");
+      
+      console.log("Survey submitted:", completeResponse);
+    } catch (error) {
+      console.error("Error submitting survey:", error);
+      toast.error("Une erreur s'est produite lors de la soumission du sondage. Veuillez réessayer.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   // Start a new survey
@@ -225,6 +235,7 @@ const Index = () => {
                     onClick={handleResetForm}
                     size="sm"
                     className="flex items-center gap-1 h-8 px-3 text-xs w-full sm:w-auto"
+                    disabled={isSubmitting}
                   >
                     <RotateCcw className="h-3 w-3" />
                     Reset
@@ -233,9 +244,10 @@ const Index = () => {
                   <Button 
                     type="submit" 
                     className="bg-survey-primary hover:bg-survey-highlight text-white flex items-center gap-2 px-4 py-2 w-full sm:w-auto"
+                    disabled={isSubmitting}
                   >
                     <Send className="h-4 w-4" />
-                    Soumettre le sondage
+                    {isSubmitting ? "Soumission en cours..." : "Soumettre le sondage"}
                   </Button>
                 </div>
               </form>
