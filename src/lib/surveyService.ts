@@ -1,10 +1,16 @@
 
-import { supabase } from './supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 import { SurveyResponse } from '@/types/survey';
 import { toast } from 'sonner';
 
 // Save a new survey response to Supabase
 export const saveSurveyToDatabase = async (response: SurveyResponse): Promise<boolean> => {
+  // If Supabase is not configured, return false but don't show an error
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, unable to save to database');
+    return false;
+  }
+  
   try {
     const { error } = await supabase
       .from('survey_responses')
@@ -26,6 +32,12 @@ export const saveSurveyToDatabase = async (response: SurveyResponse): Promise<bo
 
 // Get all survey responses from Supabase
 export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> => {
+  // If Supabase is not configured, return empty array but don't show an error
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, unable to fetch from database');
+    return [];
+  }
+  
   try {
     const { data, error } = await supabase
       .from('survey_responses')
@@ -48,6 +60,12 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
 
 // Count total number of survey responses
 export const countSurveyResponses = async (): Promise<number> => {
+  // If Supabase is not configured, return 0 but don't show an error
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, unable to count responses');
+    return 0;
+  }
+  
   try {
     const { count, error } = await supabase
       .from('survey_responses')
