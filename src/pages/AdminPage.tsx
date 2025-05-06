@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   getAllSurveyResponses,
@@ -37,17 +36,30 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    const storedResponses = getAllSurveyResponses();
+    const fetchResponses = async () => {
+      try {
+        // Get responses from the database via localStorage helper
+        const storedResponses = await getAllSurveyResponses();
+        
+        // Add dummy data if no responses exist
+        if (storedResponses.length === 0) {
+          const dummyData = generateDummyData(10);
+          setResponses(dummyData);
+          setFilteredResponses(dummyData);
+        } else {
+          setResponses(storedResponses);
+          setFilteredResponses(storedResponses);
+        }
+      } catch (error) {
+        console.error("Error fetching survey responses:", error);
+        // Fallback to dummy data in case of errors
+        const dummyData = generateDummyData(10);
+        setResponses(dummyData);
+        setFilteredResponses(dummyData);
+      }
+    };
     
-    // Add dummy data if no responses exist
-    if (storedResponses.length === 0) {
-      const dummyData = generateDummyData(10);
-      setResponses(dummyData);
-      setFilteredResponses(dummyData);
-    } else {
-      setResponses(storedResponses);
-      setFilteredResponses(storedResponses);
-    }
+    fetchResponses();
   }, []);
 
   useEffect(() => {
@@ -96,9 +108,9 @@ const AdminPage = () => {
     });
   };
 
-  const handleClearResponses = () => {
+  const handleClearResponses = async () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer toutes les réponses du sondage ? Cette action est irréversible.")) {
-      clearAllSurveyData();
+      await clearAllSurveyData();
       setResponses([]);
       setFilteredResponses([]);
       alert("Toutes les réponses du sondage ont été supprimées.");
@@ -213,7 +225,7 @@ const AdminPage = () => {
             <ResponseStats responses={filteredResponses} />
           </div>
         )}
-
+        
         {showResponses && (
           <div className="mt-8">
             <h2 className="text-xl sm:text-2xl font-bold mb-2">Réponses au sondage</h2>
