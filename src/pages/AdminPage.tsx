@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   getAllSurveyResponses,
@@ -43,20 +42,26 @@ const AdminPage = () => {
     const fetchResponses = async () => {
       try {
         setIsLoading(true);
+        console.log("Fetching responses from database...");
+        
         // Get responses directly from Supabase
         const storedResponses = await getAllSurveyResponsesFromDB();
+        console.log(`Received ${storedResponses.length} responses from database`);
         
-        // Get the total count
+        // Get the total count separately
         const total = await countSurveyResponses();
+        console.log(`Total response count: ${total}`);
         setResponseCount(total);
         
         if (storedResponses.length > 0) {
           setResponses(storedResponses);
           setFilteredResponses(storedResponses);
+          console.log("Responses set successfully");
         } else {
           setResponses([]);
           setFilteredResponses([]);
           toast.info("No survey responses found in database.");
+          console.log("No responses found in database");
         }
       } catch (error) {
         console.error("Error fetching survey responses:", error);
@@ -131,8 +136,15 @@ const AdminPage = () => {
   const handleRefreshData = async () => {
     try {
       setIsLoading(true);
+      console.log("Refreshing data from database...");
+      
+      // Force a fresh fetch from the database
       const storedResponses = await getAllSurveyResponsesFromDB();
+      console.log(`Refresh: Received ${storedResponses.length} responses from database`);
+      
+      // Force a fresh count from the database
       const total = await countSurveyResponses();
+      console.log(`Refresh: Total count is ${total}`);
       setResponseCount(total);
       
       setResponses(storedResponses);

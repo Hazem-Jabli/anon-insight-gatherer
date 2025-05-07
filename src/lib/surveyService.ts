@@ -52,6 +52,15 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
     }
     
     console.log(`Retrieved ${data?.length || 0} responses from Supabase`);
+    
+    if (!data || data.length === 0) {
+      console.log('No data returned from Supabase query');
+      return [];
+    }
+    
+    // Debug log the first item to check structure
+    console.log('First response item structure:', JSON.stringify(data[0]));
+    
     return data as SurveyResponse[] || [];
   } catch (err) {
     console.error('Exception fetching from Supabase:', err);
@@ -71,10 +80,10 @@ export const countSurveyResponses = async (): Promise<number> => {
   try {
     console.log('Counting responses in Supabase...');
     
-    // First try to get all responses and count them (more reliable)
+    // Use a dedicated query just for counting
     const { data, error } = await supabase
       .from('survey_responses')
-      .select('*');
+      .select('id');
       
     if (error) {
       console.error('Error counting surveys:', error);
@@ -82,7 +91,7 @@ export const countSurveyResponses = async (): Promise<number> => {
     }
     
     const count = data?.length || 0;
-    console.log(`Found ${count} responses in Supabase using direct count`);
+    console.log(`Found ${count} responses in Supabase database`);
     return count;
   } catch (err) {
     console.error('Exception counting surveys:', err);
