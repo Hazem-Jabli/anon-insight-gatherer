@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   getAllSurveyResponses,
@@ -17,6 +18,7 @@ import Footer from '@/components/layout/Footer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { getAllSurveyResponsesFromDB, countSurveyResponses } from '@/lib/surveyService';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 const ADMIN_PIN = "223344";
 
@@ -38,6 +40,31 @@ const AdminPage = () => {
     professionalSector: null as string | null
   });
 
+  // Check Supabase connection on load
+  useEffect(() => {
+    const checkConnection = async () => {
+      const isConfigured = isSupabaseConfigured();
+      console.log("Supabase configured:", isConfigured);
+      console.log("Supabase URL:", supabase.supabaseUrl);
+      
+      if (isConfigured) {
+        // Test query to check connection
+        try {
+          const { data, error } = await supabase.from('survey_responses').select('count(*)', { count: 'exact', head: true });
+          if (error) {
+            console.error("Supabase connection test failed:", error);
+          } else {
+            console.log("Supabase connection test succeeded");
+          }
+        } catch (err) {
+          console.error("Error testing Supabase connection:", err);
+        }
+      }
+    };
+    
+    checkConnection();
+  }, []);
+
   useEffect(() => {
     const fetchResponses = async () => {
       try {
@@ -56,12 +83,12 @@ const AdminPage = () => {
         if (storedResponses.length > 0) {
           setResponses(storedResponses);
           setFilteredResponses(storedResponses);
-          console.log("Responses set successfully");
+          console.log("Responses set successfully:", storedResponses);
         } else {
+          console.log("No responses found in database");
           setResponses([]);
           setFilteredResponses([]);
           toast.info("No survey responses found in database.");
-          console.log("No responses found in database");
         }
       } catch (error) {
         console.error("Error fetching survey responses:", error);
@@ -138,18 +165,34 @@ const AdminPage = () => {
       setIsLoading(true);
       console.log("Refreshing data from database...");
       
-      // Force a fresh fetch from the database
-      const storedResponses = await getAllSurveyResponsesFromDB();
-      console.log(`Refresh: Received ${storedResponses.length} responses from database`);
+      // Direct query to Supabase to check connection
+      const testQuery = await supabase.from('survey_responses').select('count(*)', { count: 'exact' });
+      console.log("Test query result:", testQuery);
       
-      // Force a fresh count from the database
-      const total = await countSurveyResponses();
-      console.log(`Refresh: Total count is ${total}`);
-      setResponseCount(total);
-      
-      setResponses(storedResponses);
-      setFilteredResponses(storedResponses);
-      toast.success("Données rafraîchies avec succès.");
+      // Force a fresh fetch from the database with cache control
+      const { data: forcedData, error: forcedError } = await supabase
+        .from('survey_responses')
+        .select('*')
+        .order('submittedAt', { ascending: false });
+        
+      if (forcedError) {
+        console.error("Direct query error:", forcedError);
+        toast.error("Error retrieving data directly from database");
+      } else {
+        console.log(`Direct query found ${forcedData?.length || 0} responses`);
+        
+        if (forcedData && forcedData.length > 0) {
+          setResponses(forcedData as SurveyResponse[]);
+          setFilteredResponses(forcedData as SurveyResponse[]);
+          setResponseCount(forcedData.length);
+          toast.success(`Data refreshed successfully. Found ${forcedData.length} responses.`);
+        } else {
+          setResponses([]);
+          setFilteredResponses([]);
+          setResponseCount(0);
+          toast.info("No data found in database.");
+        }
+      }
     } catch (error) {
       console.error("Error refreshing data:", error);
       toast.error("Erreur lors du rafraîchissement des données.");
