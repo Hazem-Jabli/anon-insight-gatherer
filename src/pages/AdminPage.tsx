@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   getAllSurveyResponses,
@@ -18,6 +19,15 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { getAllSurveyResponsesFromDB, countSurveyResponses } from '@/lib/surveyService';
 import { supabase, isSupabaseConfigured, getSupabaseUrl } from '@/lib/supabase';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const ADMIN_PIN = "223344";
 
@@ -32,6 +42,7 @@ const AdminPage = () => {
   const [activeResponseTab, setActiveResponseTab] = useState("demographics");
   const [isLoading, setIsLoading] = useState(false);
   const [responseCount, setResponseCount] = useState(0);
+  const [debugMode, setDebugMode] = useState(false);
   
   const [filters, setFilters] = useState({
     ageGroup: null as string | null,
@@ -49,11 +60,20 @@ const AdminPage = () => {
       if (isConfigured) {
         // Test query to check connection
         try {
-          const { data, error } = await supabase.from('survey_responses').select('count(*)', { count: 'exact', head: true });
+          console.log("Testing Supabase connection...");
+          const { data, error, count } = await supabase
+            .from('survey_responses')
+            .select('*', { count: 'exact' });
+            
+          console.log("Connection test result:", { data, error, count });
+          
           if (error) {
             console.error("Supabase connection test failed:", error);
           } else {
-            console.log("Supabase connection test succeeded");
+            console.log(`Supabase connection test succeeded, found ${count} rows`);
+            if (data && data.length > 0) {
+              console.log("Sample data:", data[0]);
+            }
           }
         } catch (err) {
           console.error("Error testing Supabase connection:", err);
@@ -74,26 +94,28 @@ const AdminPage = () => {
         const storedResponses = await getAllSurveyResponsesFromDB();
         console.log(`Received ${storedResponses.length} responses from database`);
         
+        if (storedResponses.length > 0) {
+          console.log("First response:", storedResponses[0]);
+        }
+        
         // Get the total count separately
         const total = await countSurveyResponses();
         console.log(`Total response count: ${total}`);
         setResponseCount(total);
         
-        if (storedResponses.length > 0) {
-          setResponses(storedResponses);
-          setFilteredResponses(storedResponses);
-          console.log("Responses set successfully:", storedResponses);
-        } else {
+        // Set responses
+        setResponses(storedResponses);
+        setFilteredResponses(storedResponses);
+        
+        if (storedResponses.length === 0) {
           console.log("No responses found in database");
-          setResponses([]);
-          setFilteredResponses([]);
           toast.info("No survey responses found in database.");
+        } else {
+          console.log("Responses set successfully");
         }
       } catch (error) {
         console.error("Error fetching survey responses:", error);
         toast.error("Error loading survey responses from database.");
-        setResponses([]);
-        setFilteredResponses([]);
       } finally {
         setIsLoading(false);
       }
@@ -164,33 +186,39 @@ const AdminPage = () => {
       setIsLoading(true);
       console.log("Refreshing data from database...");
       
-      // Direct query to Supabase to check connection
-      const testQuery = await supabase.from('survey_responses').select('count(*)', { count: 'exact' });
-      console.log("Test query result:", testQuery);
-      
-      // Force a fresh fetch from the database with cache control
-      const { data: forcedData, error: forcedError } = await supabase
+      // Direct query to Supabase with no caching
+      const { data, error, count } = await supabase
         .from('survey_responses')
-        .select('*')
+        .select('*', { count: 'exact' })
         .order('submittedAt', { ascending: false });
         
-      if (forcedError) {
-        console.error("Direct query error:", forcedError);
+      console.log("Direct query result:", { dataLength: data?.length || 0, error, count });
+      
+      if (error) {
+        console.error("Direct query error:", error);
         toast.error("Error retrieving data directly from database");
-      } else {
-        console.log(`Direct query found ${forcedData?.length || 0} responses`);
+      } else if (data) {
+        console.log(`Direct query found ${data.length} responses`);
         
-        if (forcedData && forcedData.length > 0) {
-          setResponses(forcedData as SurveyResponse[]);
-          setFilteredResponses(forcedData as SurveyResponse[]);
-          setResponseCount(forcedData.length);
-          toast.success(`Data refreshed successfully. Found ${forcedData.length} responses.`);
+        // Debug the data structure if in debug mode
+        if (debugMode && data.length > 0) {
+          console.log("Sample response data:", JSON.stringify(data[0], null, 2));
+        }
+        
+        setResponses(data as SurveyResponse[]);
+        setFilteredResponses(data as SurveyResponse[]);
+        setResponseCount(data.length);
+        
+        if (data.length > 0) {
+          toast.success(`Data refreshed successfully. Found ${data.length} responses.`);
         } else {
-          setResponses([]);
-          setFilteredResponses([]);
-          setResponseCount(0);
           toast.info("No data found in database.");
         }
+      } else {
+        setResponses([]);
+        setFilteredResponses([]);
+        setResponseCount(0);
+        toast.info("No data found in database.");
       }
     } catch (error) {
       console.error("Error refreshing data:", error);
@@ -234,6 +262,18 @@ const AdminPage = () => {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+  };
+
+  // Toggle debug mode function
+  const toggleDebugMode = () => {
+    setDebugMode(!debugMode);
+    if (!debugMode) {
+      console.log("Debug mode enabled");
+      // Log current state
+      console.log("Current responses:", responses);
+      console.log("Filtered responses:", filteredResponses);
+      console.log("Response count:", responseCount);
+    }
   };
 
   if (!authenticated) {
@@ -282,15 +322,39 @@ const AdminPage = () => {
       <main className="flex-grow container mx-auto p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
           <h1 className="text-2xl sm:text-3xl font-bold">Page d'administration du sondage</h1>
-          <Button 
-            variant="outline" 
-            onClick={handleRefreshData} 
-            className="mt-2 sm:mt-0"
-            disabled={isLoading}
-          >
-            {isLoading ? "Chargement..." : "Rafraîchir les données"}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleRefreshData} 
+              className="mt-2 sm:mt-0"
+              disabled={isLoading}
+            >
+              {isLoading ? "Chargement..." : "Rafraîchir les données"}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={toggleDebugMode}
+              className="mt-2 sm:mt-0"
+              size="sm"
+            >
+              {debugMode ? "Désactiver débogage" : "Activer débogage"}
+            </Button>
+          </div>
         </div>
+        
+        {debugMode && (
+          <Card className="mb-4 bg-yellow-50 dark:bg-yellow-900/20">
+            <CardContent className="pt-4">
+              <h3 className="text-lg font-semibold mb-2">Informations de débogage</h3>
+              <div className="text-sm space-y-1">
+                <p>URL Supabase: {getSupabaseUrl()}</p>
+                <p>Supabase configuré: {isSupabaseConfigured() ? 'Oui' : 'Non'}</p>
+                <p>Nombre de réponses: {responses.length}</p>
+                <p>Nombre affiché: {responseCount}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
@@ -320,12 +384,53 @@ const AdminPage = () => {
 
         {isLoading ? (
           <div className="p-8 text-center">Chargement des données...</div>
+        ) : responses.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center p-8">
+                <p className="mb-4">Aucune réponse trouvée dans la base de données.</p>
+                <Button onClick={handleRefreshData}>Rafraîchir les données</Button>
+              </div>
+            </CardContent>
+          </Card>
         ) : (
           <>
             {filteredResponses.length > 0 && (
               <div className={isMobile ? "mb-6" : ""}>
                 <ResponseStats responses={filteredResponses} />
               </div>
+            )}
+            
+            {debugMode && (
+              <Card className="mb-4">
+                <CardHeader>
+                  <CardTitle>Aperçu des données brutes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Âge</TableHead>
+                        <TableHead>Éducation</TableHead>
+                        <TableHead>Secteur</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredResponses.slice(0, 5).map((response) => (
+                        <TableRow key={response.id}>
+                          <TableCell>{response.id.substring(0, 8)}...</TableCell>
+                          <TableCell>{new Date(response.submittedAt).toLocaleDateString()}</TableCell>
+                          <TableCell>{response.demographics?.ageGroup}</TableCell>
+                          <TableCell>{response.demographics?.educationLevel}</TableCell>
+                          <TableCell>{response.demographics?.professionalSector}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             )}
             
             {showResponses && (
@@ -355,15 +460,15 @@ const AdminPage = () => {
                               </div>
                               <div>
                                 <p className="font-semibold">Groupe d'âge:</p>
-                                <p>{response.demographics.ageGroup}</p>
+                                <p>{response.demographics?.ageGroup}</p>
                               </div>
                               <div>
                                 <p className="font-semibold">Niveau d'éducation:</p>
-                                <p>{response.demographics.educationLevel}</p>
+                                <p>{response.demographics?.educationLevel}</p>
                               </div>
                               <div>
                                 <p className="font-semibold">Secteur professionnel:</p>
-                                <p>{response.demographics.professionalSector}</p>
+                                <p>{response.demographics?.professionalSector}</p>
                               </div>
                             </TabsContent>
                             

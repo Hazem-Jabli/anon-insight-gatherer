@@ -40,14 +40,16 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
   
   try {
     console.log('Fetching responses from Supabase with URL:', getSupabaseUrl());
-    
-    // Verify connection before attempting query
     console.log('Supabase connection status:', isSupabaseConfigured() ? 'Configured' : 'Not configured');
     
-    const { data, error } = await supabase
+    // Making a direct query with no caching
+    const { data, error, count, status } = await supabase
       .from('survey_responses')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('submittedAt', { ascending: false });
+    
+    console.log('Supabase query status:', status);  
+    console.log('Retrieved count:', count);
       
     if (error) {
       console.error('Error fetching from Supabase:', error);
@@ -55,22 +57,22 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
       return [];
     }
     
-    console.log(`Retrieved ${data?.length || 0} responses from Supabase`);
-    
     if (!data) {
       console.log('Data is null from Supabase query');
       return [];
     }
     
-    if (data.length === 0) {
-      console.log('No data returned from Supabase query (empty array)');
-      return [];
-    }
+    console.log(`Retrieved ${data.length} responses from Supabase`);
     
-    // Debug log all items to check structure
-    console.log('All response items:', JSON.stringify(data));
+    // Debug each item to check their structure
+    data.forEach((item, index) => {
+      console.log(`Response ${index + 1}:`, item);
+    });
     
-    return data as SurveyResponse[];
+    // Convert to SurveyResponse type
+    const responses = data as SurveyResponse[];
+    
+    return responses;
   } catch (err) {
     console.error('Exception fetching from Supabase:', err);
     toast.error('Unexpected error loading survey data.');
@@ -89,29 +91,29 @@ export const countSurveyResponses = async (): Promise<number> => {
   try {
     console.log('Counting responses in Supabase...');
     
-    // Force a fresh count with no caching
-    const { data, error, status } = await supabase
+    // Direct query with count exact
+    const { count, error, status } = await supabase
       .from('survey_responses')
-      .select('id', { count: 'exact', head: false });
+      .select('*', { count: 'exact', head: false });
       
-    console.log('Supabase response status:', status);
+    console.log('Count query status:', status);
     
     if (error) {
       console.error('Error counting surveys:', error);
       return 0;
     }
     
-    const count = data?.length || 0;
-    console.log(`Found ${count} responses in Supabase database`);
+    const countValue = count || 0;
+    console.log(`Found ${countValue} responses in database (count method)`);
     
-    // Additional fetch to double-check
+    // Double-check with a regular select query
     const checkResult = await supabase
       .from('survey_responses')
       .select('*');
       
     console.log(`Double-check query found ${checkResult.data?.length || 0} responses`);
     
-    return count;
+    return countValue;
   } catch (err) {
     console.error('Exception counting surveys:', err);
     return 0;
