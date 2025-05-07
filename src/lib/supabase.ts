@@ -19,3 +19,8 @@ export const isSupabaseConfigured = (): boolean => {
     supabaseUrl === 'https://qgmrdospdjqzyxqixwmv.supabase.co'
   );
 };
+
+// Export a function to get the Supabase URL
+export const getSupabaseUrl = (): string => {
+  return supabaseUrl;
+};

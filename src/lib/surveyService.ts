@@ -1,5 +1,5 @@
 
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, isSupabaseConfigured, getSupabaseUrl } from './supabase';
 import { SurveyResponse } from '@/types/survey';
 import { toast } from 'sonner';
 
@@ -39,7 +39,7 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
   }
   
   try {
-    console.log('Fetching responses from Supabase with URL:', supabase.supabaseUrl);
+    console.log('Fetching responses from Supabase with URL:', getSupabaseUrl());
     
     // Verify connection before attempting query
     console.log('Supabase connection status:', isSupabaseConfigured() ? 'Configured' : 'Not configured');

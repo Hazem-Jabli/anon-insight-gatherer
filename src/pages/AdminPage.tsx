@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   getAllSurveyResponses,
@@ -18,7 +17,7 @@ import Footer from '@/components/layout/Footer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { getAllSurveyResponsesFromDB, countSurveyResponses } from '@/lib/surveyService';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, getSupabaseUrl } from '@/lib/supabase';
 
 const ADMIN_PIN = "223344";
 
@@ -45,7 +44,7 @@ const AdminPage = () => {
     const checkConnection = async () => {
       const isConfigured = isSupabaseConfigured();
       console.log("Supabase configured:", isConfigured);
-      console.log("Supabase URL:", supabase.supabaseUrl);
+      console.log("Supabase URL:", getSupabaseUrl());
       
       if (isConfigured) {
         // Test query to check connection
