@@ -76,10 +76,16 @@ export const saveSurveyResponse = async (response: SurveyResponse): Promise<void
   }
 };
 
-// Get all survey responses
+// Get all survey responses directly from the database
 export const getAllSurveyResponses = async (): Promise<SurveyResponse[]> => {
-  const store = await initializeSurveyDataStore();
-  return store.responses;
+  try {
+    return await getAllSurveyResponsesFromDB();
+  } catch (error) {
+    console.error('Error fetching responses from DB:', error);
+    // Fall back to local storage if DB fetch fails
+    const store = await initializeSurveyDataStore();
+    return store.responses;
+  }
 };
 
 // Save survey in progress to prevent data loss on page refresh
@@ -154,9 +160,9 @@ export const exportSurveyDataAsCSV = async (): Promise<string> => {
     const row = [
       response.id,
       response.submittedAt,
-      response.demographics.ageGroup,
-      response.demographics.educationLevel,
-      response.demographics.professionalSector,
+      response.demographics?.ageGroup || '',
+      response.demographics?.educationLevel || '',
+      response.demographics?.professionalSector || '',
       response.additionalFeedback || ''
     ];
     
