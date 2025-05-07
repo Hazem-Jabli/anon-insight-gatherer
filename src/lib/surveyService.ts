@@ -52,7 +52,7 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
     }
     
     console.log(`Retrieved ${data?.length || 0} responses from Supabase`);
-    return data as SurveyResponse[];
+    return data as SurveyResponse[] || [];
   } catch (err) {
     console.error('Exception fetching from Supabase:', err);
     toast.error('Unexpected error loading survey data.');
@@ -70,17 +70,20 @@ export const countSurveyResponses = async (): Promise<number> => {
   
   try {
     console.log('Counting responses in Supabase...');
-    const { count, error } = await supabase
+    
+    // First try to get all responses and count them (more reliable)
+    const { data, error } = await supabase
       .from('survey_responses')
-      .select('*', { count: 'exact', head: true });
+      .select('*');
       
     if (error) {
       console.error('Error counting surveys:', error);
       return 0;
     }
     
-    console.log(`Found ${count || 0} responses in Supabase`);
-    return count || 0;
+    const count = data?.length || 0;
+    console.log(`Found ${count} responses in Supabase using direct count`);
+    return count;
   } catch (err) {
     console.error('Exception counting surveys:', err);
     return 0;

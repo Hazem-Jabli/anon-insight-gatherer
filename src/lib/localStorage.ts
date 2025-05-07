@@ -16,6 +16,7 @@ export const initializeSurveyDataStore = async (): Promise<SurveyDataStore> => {
   try {
     // Get responses from Supabase
     const responses = await getAllSurveyResponsesFromDB();
+    console.log(`Initialized survey data store with ${responses.length} responses from DB`);
     
     return {
       responses,
@@ -79,7 +80,9 @@ export const saveSurveyResponse = async (response: SurveyResponse): Promise<void
 // Get all survey responses directly from the database
 export const getAllSurveyResponses = async (): Promise<SurveyResponse[]> => {
   try {
-    return await getAllSurveyResponsesFromDB();
+    const responses = await getAllSurveyResponsesFromDB();
+    console.log(`getAllSurveyResponses: Retrieved ${responses.length} responses from DB`);
+    return responses;
   } catch (error) {
     console.error('Error fetching responses from DB:', error);
     // Fall back to local storage if DB fetch fails
