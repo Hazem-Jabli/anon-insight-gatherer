@@ -12,6 +12,7 @@ export const saveSurveyToDatabase = async (response: SurveyResponse): Promise<bo
   }
   
   try {
+    console.log('Attempting to save survey response to Supabase:', response);
     const { error } = await supabase
       .from('survey_responses')
       .insert([response]);
@@ -22,6 +23,7 @@ export const saveSurveyToDatabase = async (response: SurveyResponse): Promise<bo
       return false;
     }
     
+    console.log('Survey response saved successfully to Supabase');
     return true;
   } catch (err) {
     console.error('Exception saving to Supabase:', err);
@@ -42,18 +44,39 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
     console.log('Fetching responses from Supabase with URL:', getSupabaseUrl());
     console.log('Supabase connection status:', isSupabaseConfigured() ? 'Configured' : 'Not configured');
     
+    // First check if the table exists
+    const { data: tables, error: tablesError } = await supabase
+      .from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public');
+      
+    if (tablesError) {
+      console.error('Error checking tables in Supabase:', tablesError);
+    } else {
+      console.log('Available tables:', tables?.map(t => t.table_name).join(', ') || 'None');
+      
+      // Check if our table exists
+      const surveyTableExists = tables?.some(t => t.table_name === 'survey_responses');
+      console.log('survey_responses table exists:', surveyTableExists ? 'Yes' : 'No');
+      
+      if (!surveyTableExists) {
+        console.warn('The survey_responses table does not exist in the database');
+        toast.error('Database table not found. Please set up the database first.');
+        return [];
+      }
+    }
+    
     // Making a direct query with no caching
+    console.log('Executing query to fetch survey responses...');
     const { data, error, count, status } = await supabase
       .from('survey_responses')
-      .select('*', { count: 'exact' })
-      .order('submittedAt', { ascending: false });
+      .select('*', { count: 'exact' });
     
     console.log('Supabase query status:', status);  
-    console.log('Retrieved count:', count);
-      
+    
     if (error) {
       console.error('Error fetching from Supabase:', error);
-      toast.error('Error loading survey data.');
+      toast.error('Error loading survey data: ' + error.message);
       return [];
     }
     
@@ -94,7 +117,7 @@ export const countSurveyResponses = async (): Promise<number> => {
     // Direct query with count exact
     const { count, error, status } = await supabase
       .from('survey_responses')
-      .select('*', { count: 'exact', head: false });
+      .select('*', { count: 'exact', head: true });
       
     console.log('Count query status:', status);
     
@@ -109,7 +132,7 @@ export const countSurveyResponses = async (): Promise<number> => {
     // Double-check with a regular select query
     const checkResult = await supabase
       .from('survey_responses')
-      .select('*');
+      .select('id');
       
     console.log(`Double-check query found ${checkResult.data?.length || 0} responses`);
     
@@ -117,5 +140,37 @@ export const countSurveyResponses = async (): Promise<number> => {
   } catch (err) {
     console.error('Exception counting surveys:', err);
     return 0;
+  }
+};
+
+// Function to check if the survey_responses table exists
+export const checkDatabaseSetup = async (): Promise<boolean> => {
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, unable to check database setup');
+    return false;
+  }
+  
+  try {
+    console.log('Checking database setup...');
+    
+    // Check if the survey_responses table exists
+    const { data, error } = await supabase
+      .from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public')
+      .eq('table_name', 'survey_responses');
+      
+    if (error) {
+      console.error('Error checking database setup:', error);
+      return false;
+    }
+    
+    const tableExists = data && data.length > 0;
+    console.log('survey_responses table exists:', tableExists ? 'Yes' : 'No');
+    
+    return tableExists;
+  } catch (err) {
+    console.error('Exception checking database setup:', err);
+    return false;
   }
 };

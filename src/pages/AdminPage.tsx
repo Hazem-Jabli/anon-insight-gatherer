@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   getAllSurveyResponses,
@@ -17,7 +16,11 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
-import { getAllSurveyResponsesFromDB, countSurveyResponses } from '@/lib/surveyService';
+import { 
+  getAllSurveyResponsesFromDB, 
+  countSurveyResponses,
+  checkDatabaseSetup 
+} from '@/lib/surveyService';
 import { supabase, isSupabaseConfigured, getSupabaseUrl } from '@/lib/supabase';
 import {
   Table,
@@ -43,6 +46,8 @@ const AdminPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [responseCount, setResponseCount] = useState(0);
   const [debugMode, setDebugMode] = useState(false);
+  const [isDatabaseSetup, setIsDatabaseSetup] = useState<boolean | null>(null);
+  const [databaseError, setDatabaseError] = useState<string | null>(null);
   
   const [filters, setFilters] = useState({
     ageGroup: null as string | null,
@@ -50,7 +55,7 @@ const AdminPage = () => {
     professionalSector: null as string | null
   });
 
-  // Check Supabase connection on load
+  // Check Supabase connection and database setup on load
   useEffect(() => {
     const checkConnection = async () => {
       const isConfigured = isSupabaseConfigured();
@@ -58,26 +63,42 @@ const AdminPage = () => {
       console.log("Supabase URL:", getSupabaseUrl());
       
       if (isConfigured) {
-        // Test query to check connection
+        // Check database setup
         try {
-          console.log("Testing Supabase connection...");
-          const { data, error, count } = await supabase
-            .from('survey_responses')
-            .select('*', { count: 'exact' });
-            
-          console.log("Connection test result:", { data, error, count });
+          console.log("Checking database setup...");
+          const isSetup = await checkDatabaseSetup();
+          setIsDatabaseSetup(isSetup);
           
-          if (error) {
-            console.error("Supabase connection test failed:", error);
+          if (!isSetup) {
+            console.warn("Database is not set up correctly. The survey_responses table might not exist.");
+            setDatabaseError("The survey_responses table does not exist in the database.");
           } else {
-            console.log(`Supabase connection test succeeded, found ${count} rows`);
-            if (data && data.length > 0) {
-              console.log("Sample data:", data[0]);
+            setDatabaseError(null);
+          }
+          
+          // Test query to check connection
+          try {
+            console.log("Testing Supabase connection...");
+            const { data, error } = await supabase
+              .from('survey_responses')
+              .select('count(*)', { count: 'exact', head: true });
+              
+            if (error) {
+              console.error("Supabase connection test failed:", error);
+              setDatabaseError(`Connection error: ${error.message}`);
+            } else {
+              console.log(`Supabase connection test succeeded`);
             }
+          } catch (err) {
+            console.error("Error testing Supabase connection:", err);
+            setDatabaseError(`Unexpected error testing connection: ${err instanceof Error ? err.message : String(err)}`);
           }
         } catch (err) {
-          console.error("Error testing Supabase connection:", err);
+          console.error("Error checking database setup:", err);
+          setDatabaseError(`Error checking database setup: ${err instanceof Error ? err.message : String(err)}`);
         }
+      } else {
+        setDatabaseError("Supabase is not configured.");
       }
     };
     
@@ -89,6 +110,13 @@ const AdminPage = () => {
       try {
         setIsLoading(true);
         console.log("Fetching responses from database...");
+        
+        // Check if database is set up before fetching
+        if (isDatabaseSetup === false) {
+          console.warn("Skipping data fetch because database is not set up.");
+          setIsLoading(false);
+          return;
+        }
         
         // Get responses directly from Supabase
         const storedResponses = await getAllSurveyResponsesFromDB();
@@ -124,7 +152,7 @@ const AdminPage = () => {
     if (authenticated) {
       fetchResponses();
     }
-  }, [authenticated]);
+  }, [authenticated, isDatabaseSetup]);
 
   useEffect(() => {
     applyFilters();
@@ -186,19 +214,34 @@ const AdminPage = () => {
       setIsLoading(true);
       console.log("Refreshing data from database...");
       
+      // Check database setup first
+      const isSetup = await checkDatabaseSetup();
+      setIsDatabaseSetup(isSetup);
+      
+      if (!isSetup) {
+        console.warn("Cannot fetch data because database is not set up.");
+        setDatabaseError("The survey_responses table does not exist in the database. Please create it first.");
+        setResponses([]);
+        setFilteredResponses([]);
+        setResponseCount(0);
+        toast.error("Database table not found. Please set up the database first.");
+        return;
+      }
+      
       // Direct query to Supabase with no caching
       const { data, error, count } = await supabase
         .from('survey_responses')
-        .select('*', { count: 'exact' })
-        .order('submittedAt', { ascending: false });
+        .select('*', { count: 'exact' });
         
       console.log("Direct query result:", { dataLength: data?.length || 0, error, count });
       
       if (error) {
         console.error("Direct query error:", error);
-        toast.error("Error retrieving data directly from database");
+        setDatabaseError(`Query error: ${error.message}`);
+        toast.error(`Error retrieving data: ${error.message}`);
       } else if (data) {
         console.log(`Direct query found ${data.length} responses`);
+        setDatabaseError(null);
         
         // Debug the data structure if in debug mode
         if (debugMode && data.length > 0) {
@@ -342,6 +385,20 @@ const AdminPage = () => {
           </div>
         </div>
         
+        {databaseError && (
+          <Card className="mb-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <CardContent className="pt-4">
+              <h3 className="text-lg font-semibold mb-2">Erreur de base de données</h3>
+              <p className="text-sm text-red-700 dark:text-red-300">{databaseError}</p>
+              {isDatabaseSetup === false && (
+                <Button onClick={handleCreateTable} className="mt-4" variant="destructive">
+                  Créer la table survey_responses
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
+        
         {debugMode && (
           <Card className="mb-4 bg-yellow-50 dark:bg-yellow-900/20">
             <CardContent className="pt-4">
@@ -349,6 +406,7 @@ const AdminPage = () => {
               <div className="text-sm space-y-1">
                 <p>URL Supabase: {getSupabaseUrl()}</p>
                 <p>Supabase configuré: {isSupabaseConfigured() ? 'Oui' : 'Non'}</p>
+                <p>Database configurée: {isDatabaseSetup === null ? 'Vérification...' : isDatabaseSetup ? 'Oui' : 'Non'}</p>
                 <p>Nombre de réponses: {responses.length}</p>
                 <p>Nombre affiché: {responseCount}</p>
               </div>
