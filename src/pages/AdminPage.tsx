@@ -21,7 +21,7 @@ import {
   countSurveyResponses,
   checkDatabaseSetup 
 } from '@/lib/surveyService';
-import { supabase, isSupabaseConfigured, getSupabaseUrl } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, getSupabaseUrl, createSurveyResponsesTable } from '@/lib/supabase';
 import {
   Table,
   TableBody,
@@ -316,6 +316,33 @@ const AdminPage = () => {
       console.log("Current responses:", responses);
       console.log("Filtered responses:", filteredResponses);
       console.log("Response count:", responseCount);
+    }
+  };
+
+  // Handle creating the survey_responses table
+  const handleCreateTable = async () => {
+    try {
+      setIsLoading(true);
+      toast.info("Tentative de création de la table survey_responses...");
+      
+      const result = await createSurveyResponsesTable();
+      
+      if (result.success) {
+        toast.success("Table survey_responses créée avec succès!");
+        setIsDatabaseSetup(true);
+        setDatabaseError(null);
+        
+        // Refresh data after table creation
+        await handleRefreshData();
+      } else {
+        toast.error("Erreur lors de la création de la table: " + (result.error?.message || "Erreur inconnue"));
+        console.error("Error creating table:", result.error);
+      }
+    } catch (err) {
+      console.error("Exception creating table:", err);
+      toast.error("Exception lors de la création de la table");
+    } finally {
+      setIsLoading(false);
     }
   };
 

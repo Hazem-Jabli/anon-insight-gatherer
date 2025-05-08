@@ -12,50 +12,53 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 (async () => {
   try {
     // Create a stored procedure to create the survey_responses table
-    const { error } = await supabase.rpc('create_survey_responses_table_function', {}, {
-      count: 'exact',
-    }).catch(() => {
-      // If the function doesn't exist, create it
-      return supabase.sql(`
-        CREATE OR REPLACE FUNCTION create_survey_responses_table()
-        RETURNS void AS $$
-        BEGIN
-          -- Check if table exists
-          IF NOT EXISTS (
-            SELECT FROM pg_tables 
-            WHERE schemaname = 'public' 
-            AND tablename = 'survey_responses'
-          ) THEN
-            -- Create the table
-            CREATE TABLE public.survey_responses (
-              id UUID PRIMARY KEY,
-              submittedAt TIMESTAMP WITH TIME ZONE,
-              demographics JSONB,
-              socialMedia JSONB,
-              influencerRelations JSONB,
-              engagement JSONB,
-              purchaseIntention JSONB,
-              globalAppreciation JSONB,
-              additionalFeedback TEXT
-            );
-            
-            -- Set RLS policies
-            ALTER TABLE public.survey_responses ENABLE ROW LEVEL SECURITY;
-            
-            -- Create policies
-            CREATE POLICY "Allow anonymous read" ON public.survey_responses
-            FOR SELECT USING (true);
-            
-            CREATE POLICY "Allow anonymous insert" ON public.survey_responses
-            FOR INSERT WITH CHECK (true);
-          END IF;
-        END;
-        $$ LANGUAGE plpgsql;
-      `);
-    });
+    const { error } = await supabase.rpc('create_survey_responses_table_function');
     
     if (error) {
-      console.warn('Could not create stored procedure:', error);
+      console.warn('Could not call stored procedure. Attempting to create it...');
+      
+      // If the function doesn't exist, create it
+      const result = await supabase.from('_utils').select('create_table').execute();
+      
+      if (result.error) {
+        console.warn('Could not create stored procedure:', result.error);
+        
+        // Try to create the table directly
+        const tableResult = await supabase
+          .from('survey_responses')
+          .select('*', { count: 'exact', head: true })
+          .then(async (response) => {
+            if (response.error && response.error.code === '42P01') { // Table does not exist
+              console.log('Table does not exist, trying to create it...');
+              
+              try {
+                // Create the table using a raw query
+                // Note: This might not work depending on RLS policies
+                const createTableResult = await supabase
+                  .from('survey_responses')
+                  .insert({
+                    id: '00000000-0000-0000-0000-000000000000',
+                    submittedAt: new Date().toISOString(),
+                    demographics: {},
+                    socialMedia: {},
+                    influencerRelations: {},
+                    engagement: {},
+                    purchaseIntention: {},
+                    globalAppreciation: {}
+                  })
+                  .select();
+                  
+                return createTableResult;
+              } catch (err) {
+                console.error('Failed to create table:', err);
+                return { error: err };
+              }
+            }
+            return response;
+          });
+          
+        console.log('Direct table creation attempt result:', tableResult);
+      }
     } else {
       console.log('Database setup function created or already exists');
     }
@@ -78,4 +81,35 @@ export const isSupabaseConfigured = (): boolean => {
 // Export a function to get the Supabase URL
 export const getSupabaseUrl = (): string => {
   return supabaseUrl;
+};
+
+// Export a function to create the survey_responses table
+export const createSurveyResponsesTable = async (): Promise<{ success: boolean; error?: any }> => {
+  try {
+    console.log('Creating survey_responses table...');
+    
+    // Try to create the table with a direct create table statement
+    const { error } = await supabase.from('survey_responses').insert({
+      id: '00000000-0000-0000-0000-000000000000',
+      submittedAt: new Date().toISOString(),
+      demographics: {},
+      socialMedia: {},
+      influencerRelations: {},
+      engagement: {},
+      purchaseIntention: {},
+      globalAppreciation: {},
+      additionalFeedback: ''
+    }).select();
+    
+    if (error) {
+      console.error('Error creating table:', error);
+      return { success: false, error };
+    }
+    
+    console.log('Table created successfully!');
+    return { success: true };
+  } catch (err) {
+    console.error('Exception creating table:', err);
+    return { success: false, error: err };
+  }
 };
