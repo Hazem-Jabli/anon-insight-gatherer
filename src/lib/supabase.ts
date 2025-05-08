@@ -17,11 +17,16 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
     if (error) {
       console.warn('Could not call stored procedure. Attempting to create it...');
       
-      // If the function doesn't exist, create it
-      const result = await supabase.from('_utils').select('create_table').execute();
-      
-      if (result.error) {
-        console.warn('Could not create stored procedure:', result.error);
+      // If the function doesn't exist, try to create the table directly
+      try {
+        // Try to create the table directly using a query instead of execute method
+        const result = await supabase
+          .from('_utils')
+          .select('create_table');
+          
+        console.log('Create table query result:', result);
+      } catch (err) {
+        console.warn('Could not query utils:', err);
         
         // Try to create the table directly
         const tableResult = await supabase
