@@ -44,42 +44,32 @@ export const getAllSurveyResponsesFromDB = async (): Promise<SurveyResponse[]> =
     console.log('Fetching responses from Supabase with URL:', getSupabaseUrl());
     console.log('Supabase connection status:', isSupabaseConfigured() ? 'Configured' : 'Not configured');
     
-    // Direct query to check if table exists first
-    try {
-      // Making a direct query with no caching
-      console.log('Executing query to fetch survey responses...');
-      const { data, error, count, status } = await supabase
-        .from('survey_responses')
-        .select('*', { count: 'exact' });
-      
-      console.log('Supabase query status:', status);  
-      
-      if (error) {
-        console.error('Error fetching from Supabase:', error);
-        toast.error('Error loading survey data: ' + error.message);
-        return [];
-      }
-      
-      if (!data) {
-        console.log('Data is null from Supabase query');
-        return [];
-      }
-      
-      console.log(`Retrieved ${data.length} responses from Supabase`);
-      
-      // Debug each item to check their structure
-      data.forEach((item, index) => {
-        console.log(`Response ${index + 1}:`, item);
-      });
-      
-      // Convert to SurveyResponse type
-      const responses = data as SurveyResponse[];
-      
-      return responses;
-    } catch (err) {
-      console.error('Exception in direct query:', err);
+    // Use simpler query with fewer options to improve reliability
+    const { data, error } = await supabase
+      .from('survey_responses')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching from Supabase:', error);
+      toast.error('Error loading survey data: ' + error.message);
       return [];
     }
+    
+    if (!data) {
+      console.log('Data is null from Supabase query');
+      return [];
+    }
+    
+    console.log(`Retrieved ${data.length} responses from Supabase`);
+    
+    // Debug each item to check their structure
+    data.forEach((item, index) => {
+      console.log(`Response ${index + 1}:`, item);
+    });
+    
+    // Type assertion
+    const responses = data as SurveyResponse[];
+    return responses;
   } catch (err) {
     console.error('Exception fetching from Supabase:', err);
     toast.error('Unexpected error loading survey data.');
@@ -98,12 +88,10 @@ export const countSurveyResponses = async (): Promise<number> => {
   try {
     console.log('Counting responses in Supabase...');
     
-    // Direct query with count exact
-    const { count, error, status } = await supabase
+    // Simplified count query
+    const { count, error } = await supabase
       .from('survey_responses')
       .select('*', { count: 'exact', head: true });
-      
-    console.log('Count query status:', status);
     
     if (error) {
       console.error('Error counting surveys:', error);
@@ -130,18 +118,18 @@ export const checkDatabaseSetup = async (): Promise<boolean> => {
   try {
     console.log('Checking database setup...');
     
-    // Directly check if table exists by trying to select from it
-    const { data, error } = await supabase
+    // Simplified table existence check
+    const { error } = await supabase
       .from('survey_responses')
       .select('id', { count: 'exact', head: true });
-      
+    
     // If we get a specific error code, table doesn't exist
     if (error && error.code === '42P01') {
       console.log('survey_responses table does not exist');
       return false;
     }
     
-    // If no error or different error code, assume table exists
+    // If no error, assume table exists
     const tableExists = !error;
     console.log('survey_responses table exists:', tableExists ? 'Yes' : 'No');
     
@@ -149,5 +137,34 @@ export const checkDatabaseSetup = async (): Promise<boolean> => {
   } catch (err) {
     console.error('Exception checking database setup:', err);
     return false;
+  }
+};
+
+// Add a function to directly fetch all responses for debugging
+export const debugFetchAllResponses = async (): Promise<any[]> => {
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, unable to debug fetch');
+    return [];
+  }
+  
+  try {
+    console.log('Debug: Direct fetch attempt from survey_responses table');
+    
+    // Most basic query possible
+    const { data, error } = await supabase
+      .from('survey_responses')
+      .select('*')
+      .limit(100);
+    
+    if (error) {
+      console.error('Debug fetch error:', error);
+      return [];
+    }
+    
+    console.log('Debug fetch result:', data);
+    return data || [];
+  } catch (err) {
+    console.error('Exception in debug fetch:', err);
+    return [];
   }
 };

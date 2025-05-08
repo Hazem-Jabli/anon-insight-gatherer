@@ -8,67 +8,24 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 // Create the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// When the client is created, set up the stored procedure
+// Check if table exists on initialization to avoid errors
 (async () => {
   try {
-    // Create a stored procedure to create the survey_responses table
-    const { error } = await supabase.rpc('create_survey_responses_table_function');
+    console.log('Initializing Supabase connection and checking table existence...');
     
-    if (error) {
-      console.warn('Could not call stored procedure. Attempting to create it...');
-      
-      // If the function doesn't exist, try to create the table directly
-      try {
-        // Try to create the table directly using a query instead of execute method
-        const result = await supabase
-          .from('_utils')
-          .select('create_table');
-          
-        console.log('Create table query result:', result);
-      } catch (err) {
-        console.warn('Could not query utils:', err);
-        
-        // Try to create the table directly
-        const tableResult = await supabase
-          .from('survey_responses')
-          .select('*', { count: 'exact', head: true })
-          .then(async (response) => {
-            if (response.error && response.error.code === '42P01') { // Table does not exist
-              console.log('Table does not exist, trying to create it...');
-              
-              try {
-                // Create the table using a raw query
-                // Note: This might not work depending on RLS policies
-                const createTableResult = await supabase
-                  .from('survey_responses')
-                  .insert({
-                    id: '00000000-0000-0000-0000-000000000000',
-                    submittedAt: new Date().toISOString(),
-                    demographics: {},
-                    socialMedia: {},
-                    influencerRelations: {},
-                    engagement: {},
-                    purchaseIntention: {},
-                    globalAppreciation: {}
-                  })
-                  .select();
-                  
-                return createTableResult;
-              } catch (err) {
-                console.error('Failed to create table:', err);
-                return { error: err };
-              }
-            }
-            return response;
-          });
-          
-        console.log('Direct table creation attempt result:', tableResult);
-      }
+    // Check if table exists by trying to select from it
+    const { error } = await supabase
+      .from('survey_responses')
+      .select('id', { count: 'exact', head: true });
+    
+    if (error && error.code === '42P01') {
+      console.warn('survey_responses table does not exist, attempting to create it...');
+      await createSurveyResponsesTable();
     } else {
-      console.log('Database setup function created or already exists');
+      console.log('survey_responses table exists or other error occurred:', error ? error.message : 'No error');
     }
   } catch (err) {
-    console.warn('Error setting up database functions:', err);
+    console.warn('Error during Supabase initialization:', err);
   }
 })();
 
@@ -93,26 +50,66 @@ export const createSurveyResponsesTable = async (): Promise<{ success: boolean; 
   try {
     console.log('Creating survey_responses table...');
     
-    // Try to create the table with a direct create table statement
-    const { error } = await supabase.from('survey_responses').insert({
-      id: '00000000-0000-0000-0000-000000000000',
-      submittedAt: new Date().toISOString(),
-      demographics: {},
-      socialMedia: {},
-      influencerRelations: {},
-      engagement: {},
-      purchaseIntention: {},
-      globalAppreciation: {},
-      additionalFeedback: ''
-    }).select();
-    
-    if (error) {
-      console.error('Error creating table:', error);
-      return { success: false, error };
+    // First test if the table already exists by selecting from it
+    const { error: testError } = await supabase
+      .from('survey_responses')
+      .select('id', { count: 'exact', head: true });
+      
+    // If the table exists, return success
+    if (!testError) {
+      console.log('Table already exists!');
+      return { success: true };
     }
     
-    console.log('Table created successfully!');
-    return { success: true };
+    // If we get an error other than table doesn't exist, return failure
+    if (testError && testError.code !== '42P01') {
+      console.error('Error checking table:', testError);
+      return { success: false, error: testError };
+    }
+    
+    console.log('Table does not exist, attempting to create it...');
+    
+    // Try to create the table with a direct SQL query
+    // This will only work if the user has permission to create tables
+    try {
+      const { error } = await supabase.rpc('create_survey_responses_table');
+      
+      if (error) {
+        console.warn('RPC failed, attempting direct insert instead:', error);
+        
+        // Try to create it by inserting a record
+        const insertResult = await supabase
+          .from('survey_responses')
+          .insert({
+            id: '00000000-0000-0000-0000-000000000000',
+            submittedAt: new Date().toISOString(),
+            demographics: {},
+            socialMedia: {},
+            influencerRelations: {},
+            engagement: {},
+            purchaseIntention: {},
+            globalAppreciation: {},
+            additionalFeedback: ''
+          });
+          
+        if (insertResult.error && insertResult.error.code === '42P01') {
+          console.error('Failed to create table via insert:', insertResult.error);
+          return { success: false, error: insertResult.error };
+        }
+        
+        // Check if the table now exists
+        const { error: checkError } = await supabase
+          .from('survey_responses')
+          .select('id', { count: 'exact', head: true });
+          
+        return { success: !checkError, error: checkError };
+      }
+      
+      return { success: true };
+    } catch (err) {
+      console.error('Exception creating table:', err);
+      return { success: false, error: err };
+    }
   } catch (err) {
     console.error('Exception creating table:', err);
     return { success: false, error: err };
