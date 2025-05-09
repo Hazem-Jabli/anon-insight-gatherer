@@ -12,7 +12,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
   },
   global: {
-    fetch: fetch,
+    fetch: (...args) => fetch(...args),
+  },
+  db: {
+    schema: 'public',
   },
 });
 
@@ -81,9 +84,9 @@ export const createSurveyResponsesTable = async (): Promise<{ success: boolean; 
     
     console.log('Table does not exist, attempting to create it...');
     
-    // Try to insert a record - if the table doesn't exist, it will fail
     try {
-      // Try using SQL directly to create the table
+      // Try using SQL directly to create the table - this may not work with default permissions
+      console.log('Attempting to create table via RPC...');
       const { error } = await supabase.rpc('create_survey_table', {
         table_name: 'survey_responses'
       });
@@ -92,6 +95,7 @@ export const createSurveyResponsesTable = async (): Promise<{ success: boolean; 
         console.warn('RPC failed, attempting direct insert instead:', error);
         
         // Try creating the table by inserting a record
+        console.log('Attempting to create table via insert...');
         const insertResult = await supabase
           .from('survey_responses')
           .insert({
@@ -113,12 +117,18 @@ export const createSurveyResponsesTable = async (): Promise<{ success: boolean; 
       }
       
       // Verify the table exists now
+      console.log('Verifying table creation...');
       const { error: verifyError } = await supabase
         .from('survey_responses')
         .select('id')
         .limit(1);
         
       const success = !verifyError || verifyError.code !== '42P01';
+      if (success) {
+        console.log('Table creation verified successfully');
+      } else {
+        console.error('Table verification failed:', verifyError);
+      }
       return { success, error: verifyError };
     } catch (err) {
       console.error('Exception creating table:', err);

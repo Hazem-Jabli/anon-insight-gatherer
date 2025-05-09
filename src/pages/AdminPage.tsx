@@ -19,7 +19,9 @@ import { toast } from 'sonner';
 import { 
   getAllSurveyResponsesFromDB, 
   countSurveyResponses,
-  checkDatabaseSetup 
+  checkDatabaseSetup,
+  testDatabaseConnection,
+  debugFetchAllResponses
 } from '@/lib/surveyService';
 import { supabase, isSupabaseConfigured, getSupabaseUrl, createSurveyResponsesTable } from '@/lib/supabase';
 import {
@@ -31,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const ADMIN_PIN = "223344";
 
@@ -44,10 +47,12 @@ const AdminPage = () => {
   const [showResponses, setShowResponses] = useState(false);
   const [activeResponseTab, setActiveResponseTab] = useState("demographics");
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(true); // New state for initial connection
   const [responseCount, setResponseCount] = useState(0);
   const [debugMode, setDebugMode] = useState(false);
   const [isDatabaseSetup, setIsDatabaseSetup] = useState<boolean | null>(null);
   const [databaseError, setDatabaseError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
   
   const [filters, setFilters] = useState({
     ageGroup: null as string | null,
@@ -55,104 +60,80 @@ const AdminPage = () => {
     professionalSector: null as string | null
   });
 
-  // Check Supabase connection and database setup on load
+  // Test connection first on page load
   useEffect(() => {
     const checkConnection = async () => {
-      const isConfigured = isSupabaseConfigured();
-      console.log("Supabase configured:", isConfigured);
-      console.log("Supabase URL:", getSupabaseUrl());
+      if (!authenticated) return;
       
-      if (isConfigured) {
-        // Check database setup
-        try {
-          console.log("Checking database setup...");
+      setIsConnecting(true);
+      setConnectionStatus('connecting');
+      
+      try {
+        console.log("Testing database connection...");
+        const connectionResult = await testDatabaseConnection();
+        
+        if (connectionResult.isConnected) {
+          console.log("Database connection successful");
+          setConnectionStatus('connected');
+          setDatabaseError(null);
+          
+          // Check table setup
           const isSetup = await checkDatabaseSetup();
           setIsDatabaseSetup(isSetup);
           
           if (!isSetup) {
-            console.warn("Database is not set up correctly. The survey_responses table might not exist.");
             setDatabaseError("The survey_responses table does not exist in the database.");
-          } else {
-            setDatabaseError(null);
           }
-          
-          // Test query to check connection
-          try {
-            console.log("Testing Supabase connection...");
-            const { data, error } = await supabase
-              .from('survey_responses')
-              .select('count(*)', { count: 'exact', head: true });
-              
-            if (error) {
-              console.error("Supabase connection test failed:", error);
-              setDatabaseError(`Connection error: ${error.message}`);
-            } else {
-              console.log(`Supabase connection test succeeded`);
-            }
-          } catch (err) {
-            console.error("Error testing Supabase connection:", err);
-            setDatabaseError(`Unexpected error testing connection: ${err instanceof Error ? err.message : String(err)}`);
-          }
-        } catch (err) {
-          console.error("Error checking database setup:", err);
-          setDatabaseError(`Error checking database setup: ${err instanceof Error ? err.message : String(err)}`);
+        } else {
+          console.error("Connection test failed:", connectionResult.error);
+          setConnectionStatus('error');
+          setDatabaseError(connectionResult.error || "Connection failed");
         }
-      } else {
-        setDatabaseError("Supabase is not configured.");
+      } catch (err) {
+        console.error("Error checking connection:", err);
+        setConnectionStatus('error');
+        setDatabaseError(`Connection error: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        setIsConnecting(false);
       }
     };
     
     checkConnection();
-  }, []);
+  }, [authenticated]);
 
+  // Fetch data once connection is established
   useEffect(() => {
-    const fetchResponses = async () => {
+    const fetchData = async () => {
+      if (connectionStatus !== 'connected' || !authenticated || isDatabaseSetup === false) return;
+      
       try {
         setIsLoading(true);
         console.log("Fetching responses from database...");
         
-        // Check if database is set up before fetching
-        if (isDatabaseSetup === false) {
-          console.warn("Skipping data fetch because database is not set up.");
-          setIsLoading(false);
-          return;
-        }
+        // Attempt to fetch data directly
+        const directFetch = await debugFetchAllResponses();
+        console.log(`Direct fetch found ${directFetch.length} responses`);
         
-        // Get responses directly from Supabase
-        const storedResponses = await getAllSurveyResponsesFromDB();
-        console.log(`Received ${storedResponses.length} responses from database`);
+        setResponses(directFetch as SurveyResponse[]);
+        setFilteredResponses(directFetch as SurveyResponse[]);
+        setResponseCount(directFetch.length);
         
-        if (storedResponses.length > 0) {
-          console.log("First response:", storedResponses[0]);
-        }
-        
-        // Get the total count separately
-        const total = await countSurveyResponses();
-        console.log(`Total response count: ${total}`);
-        setResponseCount(total);
-        
-        // Set responses
-        setResponses(storedResponses);
-        setFilteredResponses(storedResponses);
-        
-        if (storedResponses.length === 0) {
+        if (directFetch.length === 0) {
           console.log("No responses found in database");
           toast.info("No survey responses found in database.");
         } else {
-          console.log("Responses set successfully");
+          console.log("Responses set successfully:", directFetch.length);
         }
       } catch (error) {
         console.error("Error fetching survey responses:", error);
-        toast.error("Error loading survey responses from database.");
+        toast.error("Error loading survey responses. Please refresh and try again.");
       } finally {
         setIsLoading(false);
       }
     };
     
-    if (authenticated) {
-      fetchResponses();
-    }
-  }, [authenticated, isDatabaseSetup]);
+    fetchData();
+  }, [connectionStatus, authenticated, isDatabaseSetup]);
 
   useEffect(() => {
     applyFilters();
@@ -214,7 +195,24 @@ const AdminPage = () => {
       setIsLoading(true);
       console.log("Refreshing data from database...");
       
-      // Check database setup first
+      // First test the connection
+      const connectionResult = await testDatabaseConnection();
+      
+      if (!connectionResult.isConnected) {
+        console.error("Connection test failed during refresh:", connectionResult.error);
+        setDatabaseError(connectionResult.error || "Connection failed");
+        toast.error(`Connection error: ${connectionResult.error || "Unknown error"}`);
+        setResponses([]);
+        setFilteredResponses([]);
+        setResponseCount(0);
+        return;
+      }
+      
+      // Connection is good, clear any previous errors
+      setDatabaseError(null);
+      setConnectionStatus('connected');
+      
+      // Check database setup
       const isSetup = await checkDatabaseSetup();
       setIsDatabaseSetup(isSetup);
       
@@ -228,44 +226,27 @@ const AdminPage = () => {
         return;
       }
       
-      // Direct query to Supabase with no caching
-      const { data, error, count } = await supabase
-        .from('survey_responses')
-        .select('*', { count: 'exact' });
-        
-      console.log("Direct query result:", { dataLength: data?.length || 0, error, count });
+      // Fetch data using our direct fetch method
+      const data = await debugFetchAllResponses();
+      console.log(`Direct fetch found ${data.length} responses`);
       
-      if (error) {
-        console.error("Direct query error:", error);
-        setDatabaseError(`Query error: ${error.message}`);
-        toast.error(`Error retrieving data: ${error.message}`);
-      } else if (data) {
-        console.log(`Direct query found ${data.length} responses`);
-        setDatabaseError(null);
-        
-        // Debug the data structure if in debug mode
-        if (debugMode && data.length > 0) {
-          console.log("Sample response data:", JSON.stringify(data[0], null, 2));
-        }
-        
-        setResponses(data as SurveyResponse[]);
-        setFilteredResponses(data as SurveyResponse[]);
-        setResponseCount(data.length);
-        
-        if (data.length > 0) {
-          toast.success(`Data refreshed successfully. Found ${data.length} responses.`);
-        } else {
-          toast.info("No data found in database.");
-        }
+      if (data.length > 0) {
+        console.log("Sample response:", data[0]);
+      }
+      
+      setResponses(data as SurveyResponse[]);
+      setFilteredResponses(data as SurveyResponse[]);
+      setResponseCount(data.length);
+      
+      if (data.length > 0) {
+        toast.success(`Data refreshed successfully. Found ${data.length} responses.`);
       } else {
-        setResponses([]);
-        setFilteredResponses([]);
-        setResponseCount(0);
         toast.info("No data found in database.");
       }
     } catch (error) {
       console.error("Error refreshing data:", error);
-      toast.error("Erreur lors du rafraîchissement des données.");
+      toast.error(`Error refreshing data: ${error instanceof Error ? error.message : String(error)}`);
+      setDatabaseError(`Error refreshing data: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsLoading(false);
     }
@@ -316,6 +297,7 @@ const AdminPage = () => {
       console.log("Current responses:", responses);
       console.log("Filtered responses:", filteredResponses);
       console.log("Response count:", responseCount);
+      console.log("Connection status:", connectionStatus);
     }
   };
 
@@ -412,7 +394,27 @@ const AdminPage = () => {
           </div>
         </div>
         
-        {databaseError && (
+        {isConnecting ? (
+          <Alert className="mb-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <AlertTitle>Connexion à la base de données...</AlertTitle>
+            <AlertDescription>Veuillez patienter pendant que nous établissons la connexion.</AlertDescription>
+          </Alert>
+        ) : connectionStatus === 'error' ? (
+          <Alert className="mb-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <AlertTitle>Erreur de connexion</AlertTitle>
+            <AlertDescription>
+              <p className="text-sm text-red-700 dark:text-red-300 mb-2">{databaseError}</p>
+              <Button 
+                variant="outline"
+                onClick={handleRefreshData} 
+                size="sm"
+                className="mr-2"
+              >
+                Réessayer
+              </Button>
+            </AlertDescription>
+          </Alert>
+        ) : databaseError ? (
           <Card className="mb-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <CardContent className="pt-4">
               <h3 className="text-lg font-semibold mb-2">Erreur de base de données</h3>
@@ -424,7 +426,7 @@ const AdminPage = () => {
               )}
             </CardContent>
           </Card>
-        )}
+        ) : null}
         
         {debugMode && (
           <Card className="mb-4 bg-yellow-50 dark:bg-yellow-900/20">
@@ -436,6 +438,7 @@ const AdminPage = () => {
                 <p>Database configurée: {isDatabaseSetup === null ? 'Vérification...' : isDatabaseSetup ? 'Oui' : 'Non'}</p>
                 <p>Nombre de réponses: {responses.length}</p>
                 <p>Nombre affiché: {responseCount}</p>
+                <p>Statut connexion: {connectionStatus}</p>
               </div>
             </CardContent>
           </Card>
@@ -468,7 +471,9 @@ const AdminPage = () => {
         </div>
 
         {isLoading ? (
-          <div className="p-8 text-center">Chargement des données...</div>
+          <div className="p-8 text-center">
+            <div className="animate-pulse">Chargement des données...</div>
+          </div>
         ) : responses.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
